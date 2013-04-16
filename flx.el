@@ -1,3 +1,62 @@
+
+
+
+;;; flx.el --- fuzzy matching with good sorting
+
+;; this file is not part of Emacs
+
+;; Copyright (C) 2013 Le Wang
+;; Author: Le Wang
+;; Maintainer: Le Wang
+;; Description: fuzzy matching with good sorting
+;; Author: Le Wang
+;; Maintainer: Le Wang
+
+;; Created: Wed Apr 17 01:01:41 2013 (+0800)
+;; Version: 0.1
+;; Last-Updated:
+;;           By:
+;;     Update #: 1
+;; URL:
+;; Keywords:
+;; Compatibility:
+
+;;; Installation:
+
+;;
+;;
+;;
+
+;;; Commentary:
+
+;;
+;;
+;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 3, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; see the file COPYING.  If not, write to
+;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+;; Floor, Boston, MA 02110-1301, USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Code:
+
+(eval-when-compile (require 'cl))
+
+
 ;;; credit note: Daniel Skarda ido-speed-hack for bitmap idea
 ;;;     not necessary as we aren't using bitmap caching
 ;;;
@@ -15,10 +74,6 @@
 ;;;   of an optimization.
 ;;;
 
-
-
-(eval-when-compile
-  (require 'cl))
 
 (defun flx-get-hash-for-string (str heatmap-func)
   "Return hash-table for string where keys are characters value
@@ -263,6 +318,11 @@ e.g. (\"aab\" \"ab\") returns
 (provide 'flx)
 
 
-;;; macro expanded
 
 
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; flx.el ends here
