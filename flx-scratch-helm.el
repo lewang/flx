@@ -13,7 +13,7 @@
                  (setq block-started char))
                (setq last-char char)))
     (put-text-property block-started  (1+ last-char) 'face 'helm-match str)
-    (format "% [%s]" str (car score))))
+    (format "%s [%s]" str (car score))))
 
 (defun flx-helm-candidate-transformer (candidates)
   "We score candidate and add the score info for later use.
