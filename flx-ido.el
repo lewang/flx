@@ -37,7 +37,10 @@
 
 (setq ido-enable-flex-matching t)
 
-
+(defun ido-demo ()
+  (interactive)
+  (require 'flx-test-list)
+  (ido-completing-read ": " foo-list))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; testing
