@@ -1,9 +1,60 @@
+;;; flx-test.el ---
+
+;; this file is not part of Emacs
+
+;; Copyright (C) 2013 Le Wang
+;; Author: Le Wang
+;; Maintainer: Le Wang
+;; Description:
+;; Author: Le Wang
+;; Maintainer: Le Wang
+
+;; Created: Tue Apr 16 23:32:32 2013 (+0800)
+;; Version: 0.1
+;; Last-Updated:
+;;           By:
+;;     Update #: 2
+;; URL:
+;; Keywords:
+;; Compatibility:
+
+;;; Installation:
+
+;;
+;;
+;;
+
+;;; Commentary:
+
+;;
+;;
+;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 3, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; see the file COPYING.  If not, write to
+;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+;; Floor, Boston, MA 02110-1301, USA.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Code:
+
+(eval-when-compile (require 'cl))
+
 (require 'ert)
 (require 'flx)
-
-
-;; for "every" function
-(require 'cl)
 
 (ert-deftest flx-test-sanity ()
   "sanity check."
@@ -277,3 +328,6 @@ In this case, the match with more contiguous characters is better."
           (lower (flx-score "doc/command-t.txt" query (flx-make-filename-cache))))
       (should (> (car higher) (car lower))))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; flx-test.el ends here
