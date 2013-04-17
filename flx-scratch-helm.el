@@ -67,3 +67,15 @@ The score info we add here is later removed with another filter."
 (defun flx-helm-demo ()
   (interactive)
   (helm :sources '(flx-helm-candidate-list-test)))
+
+
+(setq flx-helm-no-flx
+      '((name . "flx no flx")
+        (candidates . flx-helm-test-candidates)
+        (volatile)
+        ))
+
+(defun flx-helm-no-flx ()
+  "Test Helm's volatile performance without flx."
+  (interactive)
+  (helm :sources '(flx-helm-no-flx)))
