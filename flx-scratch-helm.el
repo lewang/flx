@@ -39,9 +39,9 @@ The score info we add here is later removed with another filter."
                                   (setq candidate (cons (copy-sequence candidate) candidate)))
                                 (setcdr candidate (cons (cdr candidate) score))
                                 candidate)))
-      (sort res
-            (lambda (a b)
-              (> (caddr a) (caddr b))))
+      (setq res (sort res
+                      (lambda (a b)
+                        (> (caddr a) (caddr b)))))
       (loop for item in res
             for index from 0
             for score = (cddr item)
