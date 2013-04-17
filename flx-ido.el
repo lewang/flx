@@ -12,9 +12,7 @@
   "Better sorting for flx ido matching."
   (if (zerop (length query))
       items
-    (let ((cache (if (eq hist 'ido-file-history)
-                     flx-file-cache
-                   flx-strings-cache))
+    (let ((cache flx-file-cache)
           matches)
       (mapc (lambda (item)
               (let ((score (flx-score item query cache)))
