@@ -1,5 +1,5 @@
 ;;;
-;;; credit to scott frazer's blog entry here:http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
+;;; credit to Scott Frazer's blog entry here:http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
 ;;;
 
 (require 'ido)
