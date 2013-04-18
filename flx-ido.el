@@ -8,23 +8,53 @@
 ;;; dynamically bound by ido
 (defvar hist)
 
+(defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal))
+
+(defun flx-ido-narrowed (query)
+  "Get the value from `flx-ido-narrowed-matches-hash' with the
+  longest prefix match."
+  (let (best-match)
+    (loop for key being the hash-key of flx-ido-narrowed-matches-hash
+          do (when (and (>= (length query) (length key))
+                        (eq t
+                            (compare-strings query 0 nil
+                                             key 0 nil))
+                        (> (length key) (length best-match)))
+               (setq best-match key)
+               (when (= (length key)
+                      (length query))
+                 (return))))
+    (and best-match
+         (gethash best-match flx-ido-narrowed-matches-hash))))
+
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
   (if (zerop (length query))
       items
-    (let ((cache flx-file-cache)
-          matches)
-      (mapc (lambda (item)
-              (let ((score (flx-score item query cache)))
-                (when score
-                  (push (cons item (car score)) matches))))
-            items)
-      (mapcar 'car (if ido-rotate
-                       matches
-                     (sort matches (lambda (x y) (> (cdr x) (cdr y)))))))))
+    (let ((existing (gethash query flx-ido-narrowed-matches-hash)))
+      (or existing
+          (let* ((narrowed-items (or (flx-ido-narrowed query)
+                                     items))
+                 (matches (loop for item in narrowed-items
+                                for score = (flx-score item query flx-file-cache)
+                                if score
+                                collect (cons item (car score)) into matches
+                                finally return matches))
+                 res)
+            (setq res (mapcar
+                       'car
+                       (if ido-rotate
+                           matches
+                         (sort matches
+                               (lambda (x y) (> (cdr x) (cdr y)))))))
+            (puthash query res flx-ido-narrowed-matches-hash))))))
 
 (defvar flx-ido-use t
   "*Use flx matching for ido.")
+
+(defadvice ido-read-internal (before flx-ido-reset-hash activate)
+  "clear our narrowed hash."
+  (clrhash flx-ido-narrowed-matches-hash))
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and my-ido-fuzzy-match"
