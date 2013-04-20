@@ -55,25 +55,24 @@ The score info we add here is later removed with another filter."
 (defun flx-helm-test-candidates ()
   foo-list)
 
-(setq flx-helm-candidate-list-test
-      '((name . "flx candidate-list-test")
-        (candidates . flx-helm-test-candidates)
-        (candidate-transformer flx-helm-candidate-transformer)
-        (volatile)
-        (match-strict identity)
-        ))
-
+(defvar flx-helm-candidate-list-test
+  '((name . "flx candidate-list-test")
+    (init . (lambda ()
+              (helm-init-candidates-in-buffer
+               'global (flx-helm-test-candidates))))
+    (candidates-in-buffer)
+    (candidate-transformer flx-helm-candidate-transformer)
+    (volatile)
+    (match-strict identity)))
 
 (defun flx-helm-demo ()
   (interactive)
   (helm :sources '(flx-helm-candidate-list-test)))
 
-
-(setq flx-helm-no-flx
-      '((name . "flx no flx")
-        (candidates . flx-helm-test-candidates)
-        (volatile)
-        ))
+(defvar flx-helm-no-flx
+  '((name . "flx no flx")
+    (candidates . flx-helm-test-candidates)
+    (volatile)))
 
 (defun flx-helm-no-flx ()
   "Test Helm's volatile performance without flx."
