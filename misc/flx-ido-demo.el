@@ -1,12 +1,15 @@
 (require 'flx-ido)
 (require 'flx-test-list)
 
-(defun ido-demo ()
+(setq ido-enable-flex-matching t
+      flx-ido-use t)
+
+(defun flx-ido-demo ()
   (interactive)
   (require 'flx-test-list)
   (ido-completing-read ": " foo-list))
 
-(defun ido-big-demo (max)
+(defun flx-ido-big-demo (max)
   (interactive "P")
   (setq max (or max
                 most-positive-fixnum))
