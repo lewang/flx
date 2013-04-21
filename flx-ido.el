@@ -13,14 +13,18 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 1
+;;     Update #: 2
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
 
 ;;; Installation:
 
+;; Add to your init file:
 ;;
+;;     (require 'flx-ido)
+;;     (setq ido-enable-flex-matchint t
+;;           flx-ido-use              t)
 ;;
 ;;
 
