@@ -1,6 +1,3 @@
-
-
-
 ;;; flx.el --- fuzzy matching with good sorting
 
 ;; this file is not part of Emacs
@@ -16,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 1
+;;     Update #: 3
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -54,14 +51,10 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 
 
-;;; credit note: Daniel Skarda ido-speed-hack for bitmap idea
-;;;     not necessary as we aren't using bitmap caching
-;;;
-;;;
 ;;; credit to scott frazer's blog entry here:http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
+;;; credit to ido-hacks for ido optimization
 
 ;;; Use defsubst instead of defun
 
@@ -73,6 +66,12 @@
 ;;; * Consing causes GC, which can often slowdown Emacs more than the benefits
 ;;;   of an optimization.
 ;;;
+
+(eval-when-compile (require 'cl))
+
+(defface flx-highlight-face  '((t (:inherit font-lock-variable-name-face :bold t :underline t)))
+  "Face used by flx for highlighting flx match characters."
+  :group 'flx)
 
 
 (defun flx-get-hash-for-string (str heatmap-func)
@@ -305,6 +304,24 @@ e.g. (\"aab\" \"ab\") returns
                     (setq best-score (cons score match-vector)))))
             matches)
       best-score)))
+
+
+(defun flx-propertize (str score &optional add-score)
+  "Return propertized string according to score."
+  (let ((block-started (cadr score))
+        (last-char nil))
+    (loop for char in (cdr score)
+          do (progn
+               (when (and last-char
+                          (not (= (1+ last-char) char)))
+                 (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+                 (setq block-started char))
+               (setq last-char char)))
+    (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+    (when add-score
+      (setq str (format "%s [%s]" str (car score))))
+    str))
+
 
 
 (defvar flx-file-cache (flx-make-filename-cache)
