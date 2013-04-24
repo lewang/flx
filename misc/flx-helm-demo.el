@@ -1,20 +1,6 @@
 (require 'flx)
 (require 'flx-test-list)
 
-(defun helm-mp-flx-propertize (str score)
-  "Return propertized string according to score."
-  (let ((block-started (cadr score))
-        (last-char nil))
-    (loop for char in (cdr score)
-          do (progn
-               (when (and last-char
-                          (not (= (1+ last-char) char)))
-                 (put-text-property block-started  (1+ last-char) 'face 'helm-match str)
-                 (setq block-started char))
-               (setq last-char char)))
-    (put-text-property block-started  (1+ last-char) 'face 'helm-match str)
-    (format "%s [%s]" str (car score))))
-
 (defun flx-helm-candidate-transformer (candidates)
   "We score candidate and add the score info for later use.
 
@@ -48,7 +34,7 @@ The score info we add here is later removed with another filter."
             do (progn
                  ;; highlight first 20 matches
                  (when (and (< index 20) (> (car score) 0))
-                   (setcar item (helm-mp-flx-propertize (car item) score)))
+                   (setcar item (flx-propertize (car item) score 'add-score)))
                  (setcdr item (cadr item))))
       res)))
 
