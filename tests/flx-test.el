@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 2
+;;     Update #: 4
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -156,6 +156,10 @@
           "zz"
           ".")))
 
+
+(ert-deftest flx-score-capital ()
+  "QUERY should be downcased."
+  (should (flx-score "abc" "A" (flx-make-filename-cache))))
 
 (ert-deftest flx-score-string ()
   "score as string"

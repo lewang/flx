@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 3
+;;     Update #: 4
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -279,6 +279,7 @@ e.g. (\"aab\" \"ab\") returns
 
 (defun flx-score (str query &optional cache)
   "return best score matching QUERY against STR"
+  (setq query (downcase query))
   (unless (or (zerop (length query))
               (zerop (length str)))
     (let* ((info-hash (flx-process-cache str cache))
