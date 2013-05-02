@@ -11,7 +11,7 @@ It's not ready to be used; treat with extreme caution.
 Add this to your init file and *flx* match will be enabled for ido.
 
     (require 'flx-ido)
-    (setq ido-enable-flex-matchint t
+    (setq ido-enable-flex-matching t
           flx-ido-use              t)
 
 
