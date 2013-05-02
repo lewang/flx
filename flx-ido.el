@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 2
+;;     Update #: 8
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -69,30 +69,29 @@
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
-  (if (zerop (length query))
-      (list t (flx-ido-undecorate items))
-    (let (best-match
-          exact
-          res)
-      (loop for key being the hash-key of flx-ido-narrowed-matches-hash
-            do (when (and (>= (length query) (length key))
-                          (eq t
-                              (compare-strings query 0 (min (length query)
-                                                            (length key))
-                                               key 0 nil))
-                          (> (length key) (length best-match)))
-                 (setq best-match key)
-                 (when (= (length key)
-                          (length query))
-                   (setq exact t)
-                   (return))))
-      (setq res (cond (exact
-                       (gethash best-match flx-ido-narrowed-matches-hash))
-                      (best-match
-                       (flx-ido-undecorate (gethash best-match flx-ido-narrowed-matches-hash)))
-                      (t
-                       (flx-ido-undecorate items))))
-      (list exact res))))
+  (let (best-match
+        exact
+        res)
+    (loop for key being the hash-key of flx-ido-narrowed-matches-hash
+          do (when (and (>= (length query) (length key))
+                        (eq t
+                            (compare-strings query 0 (min (length query)
+                                                          (length key))
+                                             key 0 nil))
+                        (or (null best-match)
+                            (> (length key) (length best-match))))
+               (setq best-match key)
+               (when (= (length key)
+                        (length query))
+                 (setq exact t)
+                 (return))))
+    (setq res (cond (exact
+                     (gethash best-match flx-ido-narrowed-matches-hash))
+                    (best-match
+                     (flx-ido-undecorate (gethash best-match flx-ido-narrowed-matches-hash)))
+                    (t
+                     (flx-ido-undecorate items))))
+    (list exact res)))
 
 (defun flx-ido-undecorate (strings)
   (flx-ido-decorate strings t))
@@ -114,6 +113,11 @@
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
+  (when (and (equal "" query)
+             (not (gethash query flx-ido-narrowed-matches-hash)))
+    ;; original function reverses list.
+    (setq items (nreverse items))
+    (puthash query items flx-ido-narrowed-matches-hash))
   (destructuring-bind (exact items)
       (flx-ido-narrowed query items)
     (if exact                         ; `ido-rotate' case is covered by exact match
