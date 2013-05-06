@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 12
+;;     Update #: 15
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -63,6 +63,25 @@
 (eval-when-compile (require 'cl))
 (require 'ido)
 (require 'flx)
+
+(unless (fboundp 'ido-delete-runs)
+  (defun ido-delete-runs (list)
+    "Delete consecutive runs of same item in list.
+Comparison done with `equal'.  Runs may loop back on to the first
+item, in which case, the ending items are deleted."
+    (let ((tail list)
+          before-last-run)
+      (while tail
+        (if (consp (cdr tail))
+            (if (equal (car tail) (cadr tail))
+                (setcdr tail (cddr tail))
+              (setq before-last-run tail)
+              (setq tail (cdr tail)))
+          (setq tail (cdr tail))))
+      (when (and before-last-run
+                 (equal (car list) (cadr before-last-run)))
+        (setcdr before-last-run nil)))
+    list))
 
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal))
 
@@ -118,19 +137,20 @@
                         collect (cons item score)
                         into matches
                         finally return matches)))
-    (flx-ido-decorate (sort matches
-                            (lambda (x y) (> (cadr x) (cadr y)))))))
+    (flx-ido-decorate (ido-delete-runs
+                       (sort matches
+                             (lambda (x y) (> (cadr x) (cadr y))))))))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
   (if (memq ido-cur-item '(file dir))
       (if (equal "" query)
-          (nreverse items)
+          (nreverse (ido-delete-runs items))
         (flx-ido-match-internal query items))
     (when (and (equal "" query)
                (not (gethash query flx-ido-narrowed-matches-hash)))
       ;; original function reverses list.
-      (setq items (nreverse items))
+      (setq items (nreverse (ido-delete-runs items)))
       (puthash query items flx-ido-narrowed-matches-hash))
     (destructuring-bind (exact items)
         (flx-ido-narrowed query items)
