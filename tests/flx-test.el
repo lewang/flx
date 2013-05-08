@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 4
+;;     Update #: 5
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -190,6 +190,13 @@
          (lower (flx-score "_ab" query (flx-make-filename-cache))))
     (should (> (car higher) (car lower)))))
 
+
+(ert-deftest flx-entire-match ()
+  "when entire string is match, it shoud overpower acronym matches"
+  (let* ((query "rss")
+         (higher (flx-score "rss" query (flx-make-filename-cache)))
+         (lower (flx-score "rff-sff-sff" query (flx-make-filename-cache))))
+    (should (> (car higher) (car lower)))))
 
 ;;;;;;;;;;;;;;
 ;; advanced ;;

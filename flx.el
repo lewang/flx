@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 4
+;;     Update #: 6
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -286,11 +286,14 @@ e.g. (\"aab\" \"ab\") returns
            (heatmap (gethash 'heatmap info-hash))
            (matches (flx-get-matches info-hash query))
            (best-score nil))
-      (mapc (lambda (match-vector)
-              (let ((score 0)
+      (mapc (lambda (match-positions)
+              (let ((score (if (= (length match-positions)
+                                  (length str))
+                               10000
+                             0))
                     (contiguous-count 0)
                     last-match)
-                (loop for index in match-vector
+                (loop for index in match-positions
                       do (progn
                            (if (and last-match
                                     (= (1+ last-match) index))
@@ -302,7 +305,7 @@ e.g. (\"aab\" \"ab\") returns
                            (setq last-match index)))
                 (if (or (null best-score)
                         (> score (car best-score)))
-                    (setq best-score (cons score match-vector)))))
+                    (setq best-score (cons score match-positions)))))
             matches)
       best-score)))
 
