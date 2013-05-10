@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 5
+;;     Update #: 7
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -169,13 +169,6 @@
                (car string-score)))))
 
 
-(ert-deftest flx-basename-entire ()
-  "whole match is preferred"
-  (let* ((query "a")
-         (higher (flx-score "a" query (flx-make-filename-cache)))
-         (lower (flx-score "ab" query (flx-make-filename-cache))))
-    (should (> (car higher) (car lower)))))
-
 (ert-deftest flx-basename-order ()
   "index of match matters"
   (let* ((query "a")
@@ -191,11 +184,26 @@
     (should (> (car higher) (car lower)))))
 
 
-(ert-deftest flx-entire-match ()
+(ert-deftest flx-entire-match-1 ()
+  "whole match is preferred"
+  (let* ((query "a")
+         (higher (flx-score "a" query (flx-make-filename-cache)))
+         (lower (flx-score "ab" query (flx-make-filename-cache))))
+    (should (> (car higher) (car lower)))))
+
+(ert-deftest flx-entire-match-3 ()
   "when entire string is match, it shoud overpower acronym matches"
   (let* ((query "rss")
          (higher (flx-score "rss" query (flx-make-filename-cache)))
          (lower (flx-score "rff-sff-sff" query (flx-make-filename-cache))))
+    (should (> (car higher) (car lower)))))
+
+(ert-deftest flx-entire-match-5 ()
+  "when entire string is match, 4 letters is the cutoff when
+substring can overpower abbreviation."
+  (let* ((query "rssss")
+         (higher (flx-score "rssss" query (flx-make-filename-cache)))
+         (lower (flx-score "rff-sff-sff-sff-sff" query (flx-make-filename-cache))))
     (should (> (car higher) (car lower)))))
 
 ;;;;;;;;;;;;;;

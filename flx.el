@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 6
+;;     Update #: 11
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -285,10 +285,15 @@ e.g. (\"aab\" \"ab\") returns
     (let* ((info-hash (flx-process-cache str cache))
            (heatmap (gethash 'heatmap info-hash))
            (matches (flx-get-matches info-hash query))
+           (query-length (length query))
+           (full-match-boost (and (< query-length 5)
+                                  (> query-length 1)))
            (best-score nil))
       (mapc (lambda (match-positions)
-              (let ((score (if (= (length match-positions)
-                                  (length str))
+              (let ((score (if (and
+                                full-match-boost
+                                (= (length match-positions)
+                                   (length str)))
                                10000
                              0))
                     (contiguous-count 0)
