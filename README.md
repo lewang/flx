@@ -1,8 +1,9 @@
 [![Build Status](https://travis-ci.org/lewang/flx.png)](http://travis-ci.org/lewang/flx)
 
-# This is a technology preview.
+# This is an early alpha
 
-It's not ready to be used; treat with extreme caution.
+It's unlikely to crash your Emacs, but do expect to encounter bugs.
+
 
 [Screencast showing rationale and ido workflow][]
 
