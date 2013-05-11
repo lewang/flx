@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 11
+;;     Update #: 12
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -100,7 +100,8 @@
             (<= ?A char))))
 
 (defsubst flx-is-boundary (last-char char)
-  (or (flx-is-capital char)
+  (or (and (not (flx-is-capital last-char))
+           (flx-is-capital char))
       (null last-char)
       (and (not (flx-is-word last-char))
            (flx-is-word char))))

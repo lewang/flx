@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 7
+;;     Update #: 9
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -191,21 +191,6 @@
          (lower (flx-score "ab" query (flx-make-filename-cache))))
     (should (> (car higher) (car lower)))))
 
-(ert-deftest flx-entire-match-3 ()
-  "when entire string is match, it shoud overpower acronym matches"
-  (let* ((query "rss")
-         (higher (flx-score "rss" query (flx-make-filename-cache)))
-         (lower (flx-score "rff-sff-sff" query (flx-make-filename-cache))))
-    (should (> (car higher) (car lower)))))
-
-(ert-deftest flx-entire-match-5 ()
-  "when entire string is match, 4 letters is the cutoff when
-substring can overpower abbreviation."
-  (let* ((query "rssss")
-         (higher (flx-score "rssss" query (flx-make-filename-cache)))
-         (lower (flx-score "rff-sff-sff-sff-sff" query (flx-make-filename-cache))))
-    (should (> (car higher) (car lower)))))
-
 ;;;;;;;;;;;;;;
 ;; advanced ;;
 ;;;;;;;;;;;;;;
@@ -335,17 +320,45 @@ In this case, the match with more contiguous characters is better."
 
 (ert-deftest flx-imported-provides-intuitive-results-for-d-and-doc/command-t.txt ()
   (let ((query "d"))
-    (let ((higher (flx-score "TODO" query (flx-make-filename-cache)))
-          (lower (flx-score "doc/command-t.txt" query (flx-make-filename-cache))))
+    (let ((lower (flx-score "TODO" query (flx-make-filename-cache)))
+          (higher (flx-score "doc/command-t.txt" query (flx-make-filename-cache))))
       (should (> (car higher) (car lower))))))
 
 (ert-deftest flx-imported-provides-intuitive-results-for-do-and-doc/command-t.txt ()
   (let ((query "do"))
     ;; This test is flipped around, because we consider capitals to always be
     ;; word starters, and we very heavily favor basepath matches.
-    (let ((higher (flx-score "TODO" query (flx-make-filename-cache)))
-          (lower (flx-score "doc/command-t.txt" query (flx-make-filename-cache))))
+    (let ((higher (flx-score "doc/command-t.txt" query (flx-make-filename-cache)))
+          (lower (flx-score "TODO" query (flx-make-filename-cache))))
       (should (> (car higher) (car lower))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; new features (not in ST2) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(ert-deftest flx-entire-match-3 ()
+  "when entire string is match, it shoud overpower acronym matches"
+  (let* ((query "rss")
+         (higher (flx-score "rss" query (flx-make-filename-cache)))
+         (lower (flx-score "rff-sff-sff" query (flx-make-filename-cache))))
+    (should (> (car higher) (car lower)))))
+
+(ert-deftest flx-entire-match-5 ()
+  "when entire string is match, 4 letters is the cutoff when
+substring can overpower abbreviation."
+  (let* ((query "rssss")
+         (higher (flx-score "rssss" query (flx-make-filename-cache)))
+         (lower (flx-score "rff-sff-sff-sff-sff" query (flx-make-filename-cache))))
+    (should (> (car higher) (car lower)))))
+
+(ert-deftest flx-capital-runs ()
+  "Runs of capital letters should be considered one word."
+  (let* ((query "ab")
+         (score1 (flx-score "AFFB" query (flx-make-filename-cache)))
+         (score2 (flx-score "affb" query (flx-make-filename-cache))))
+    (should (= (car score1) (car score2)))))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
