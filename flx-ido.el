@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 15
+;;     Update #: 18
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -117,22 +117,25 @@ item, in which case, the ending items are deleted."
 
 
 (defun flx-ido-decorate (things &optional clear)
-  (let ((decorate-count (min ido-max-prospects
-                             (length things))))
-    (nconc
-     (loop for thing in things
-           for i from 0 below decorate-count
-           collect (if clear
-                       (substring-no-properties thing)
-                     ;; copy the string in case it's "pure"
-                     (flx-propertize (copy-sequence (car thing)) (cdr thing))))
-     (if clear
-         (nthcdr decorate-count things)
-       (mapcar 'car (nthcdr decorate-count things))))))
+  (if (consp (car-safe (car things)))
+      (mapcar 'car things)
+    (let ((decorate-count (min ido-max-prospects
+                               (length things))))
+      (nconc
+       (loop for thing in things
+             for i from 0 below decorate-count
+             collect (if clear
+                         (substring-no-properties thing)
+                       ;; copy the string in case it's "pure"
+                       (flx-propertize (copy-sequence (car thing)) (cdr thing))))
+       (if clear
+           (nthcdr decorate-count things)
+         (mapcar 'car (nthcdr decorate-count things)))))))
 
 (defun flx-ido-match-internal (query items)
   (let* ((matches (loop for item in items
-                        for score = (flx-score item query flx-file-cache)
+                        for string = (if (consp item) (car item) item)
+                        for score = (flx-score string query flx-file-cache)
                         if score
                         collect (cons item score)
                         into matches
@@ -140,6 +143,11 @@ item, in which case, the ending items are deleted."
     (flx-ido-decorate (ido-delete-runs
                        (sort matches
                              (lambda (x y) (> (cadr x) (cadr y))))))))
+
+(defun flx-ido-cache (query items)
+  (if (consp (car items))
+      items
+    (puthash query items flx-ido-narrowed-matches-hash)))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
@@ -151,13 +159,12 @@ item, in which case, the ending items are deleted."
                (not (gethash query flx-ido-narrowed-matches-hash)))
       ;; original function reverses list.
       (setq items (nreverse (ido-delete-runs items)))
-      (puthash query items flx-ido-narrowed-matches-hash))
-    (destructuring-bind (exact items)
+      (flx-ido-cache query items))
+    (destructuring-bind (exact res-items)
         (flx-ido-narrowed query items)
       (if exact                         ; `ido-rotate' case is covered by exact match
-          items
-        (puthash query (flx-ido-match-internal query items)
-                 flx-ido-narrowed-matches-hash)))))
+          res-items
+        (flx-ido-cache query (flx-ido-match-internal query res-items))))))
 
 (defvar flx-ido-use t
   "Use flx matching for ido.")
