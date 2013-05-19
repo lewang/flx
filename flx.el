@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 13
+;;     Update #: 15
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -169,11 +169,16 @@ See documentation for logic."
       (loop for group in groups-alist
             for index from separator-count downto 0
             with last-group-limit = nil
+            with basepath-found = nil
             do (let ((group-start (car group))
                      (word-count (cadr group))
                      ;; this is the number of effective word groups
                      (words-length (length (cddr group)))
-                     (basepath-p (not last-group-limit)))
+                     basepath-p)
+                 (when (and (not (zerop words-length))
+                            (not basepath-found))
+                   (setq basepath-found t)
+                   (setq basepath-p t))
                  (let (num)
                    (setq num
                          (if basepath-p

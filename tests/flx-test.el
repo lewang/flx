@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 9
+;;     Update #: 10
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -358,6 +358,14 @@ substring can overpower abbreviation."
          (score1 (flx-score "AFFB" query (flx-make-filename-cache)))
          (score2 (flx-score "affb" query (flx-make-filename-cache))))
     (should (= (car score1) (car score2)))))
+
+
+(ert-deftest flx-basepath-is-last-segment ()
+  "For a path like \"bar/foo/\" the basename should be foo"
+  (let* ((query "def")
+         (higher (flx-score "defuns/" query (flx-make-filename-cache)))
+         (lower (flx-score "sane-defaults.el" query (flx-make-filename-cache))))
+    (should (> (car higher) (car lower)))))
 
 
 
