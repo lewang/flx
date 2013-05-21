@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 18
+;;     Update #: 23
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -85,23 +85,24 @@ item, in which case, the ending items are deleted."
 
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal))
 
-(defun flx-ido-narrowed (query items)
+(defun flx-ido-narrowed (items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
-  (let (best-match
+  (let ((query-key (flx-ido-key-for-query))
+        best-match
         exact
         res)
     (loop for key being the hash-key of flx-ido-narrowed-matches-hash
-          do (when (and (>= (length query) (length key))
+          do (when (and (>= (length query-key) (length key))
                         (eq t
-                            (compare-strings query 0 (min (length query)
+                            (compare-strings query-key 0 (min (length query-key)
                                                           (length key))
                                              key 0 nil))
                         (or (null best-match)
                             (> (length key) (length best-match))))
                (setq best-match key)
                (when (= (length key)
-                        (length query))
+                        (length query-key))
                  (setq exact t)
                  (return))))
     (setq res (cond (exact
@@ -144,27 +145,31 @@ item, in which case, the ending items are deleted."
                        (sort matches
                              (lambda (x y) (> (cadr x) (cadr y))))))))
 
-(defun flx-ido-cache (query items)
+(defun flx-ido-key-for-query ()
+  (if (boundp 'prompt)
+      (buffer-substring-no-properties (+ (point-min)
+                                         (length prompt))
+                                      (point))
+    ido-text))
+
+(defun flx-ido-cache (items)
   (if (consp (car items))
       items
-    (puthash query items flx-ido-narrowed-matches-hash)))
+    (puthash (flx-ido-key-for-query) items flx-ido-narrowed-matches-hash)))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
-  (if (memq ido-cur-item '(file dir))
-      (if (equal "" query)
-          (nreverse (ido-delete-runs items))
-        (flx-ido-match-internal query items))
-    (when (and (equal "" query)
-               (not (gethash query flx-ido-narrowed-matches-hash)))
-      ;; original function reverses list.
-      (setq items (nreverse (ido-delete-runs items)))
-      (flx-ido-cache query items))
-    (destructuring-bind (exact res-items)
-        (flx-ido-narrowed query items)
-      (if exact                         ; `ido-rotate' case is covered by exact match
-          res-items
-        (flx-ido-cache query (flx-ido-match-internal query res-items))))))
+  (when (and (equal "" query)
+             (not (gethash (flx-ido-key-for-query)
+                           flx-ido-narrowed-matches-hash)))
+    ;; original function reverses list.
+    (setq items (nreverse (ido-delete-runs items)))
+    (flx-ido-cache items))
+  (destructuring-bind (exact res-items)
+      (flx-ido-narrowed items)
+    (if exact                         ; `ido-rotate' case is covered by exact match
+        res-items
+      (flx-ido-cache (flx-ido-match-internal query res-items)))))
 
 (defvar flx-ido-use t
   "Use flx matching for ido.")
