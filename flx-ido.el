@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 30
+;;     Update #: 32
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -171,9 +171,17 @@ item, in which case, the ending items are deleted."
 (defvar flx-ido-use t
   "Use flx matching for ido.")
 
-(defadvice ido-read-internal (before flx-ido-reset-hash activate)
-  "clear our narrowed hash."
-  (clrhash flx-ido-narrowed-matches-hash))
+(defadvice ido-read-internal (around flx-ido-reset-hash activate)
+  "Clear flx narrowed hash beforehand.
+
+Remove flx properties after."
+  (if flx-ido-use
+      (progn
+        (clrhash flx-ido-narrowed-matches-hash)
+        ad-do-it
+        (remove-text-properties 0 (length ad-return-value)
+                                '(face flx-highlight-face) ad-return-value))
+    ad-do-it))
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and my-ido-fuzzy-match"
