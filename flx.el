@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 15
+;;     Update #: 17
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -321,21 +321,30 @@ e.g. (\"aab\" \"ab\") returns
       best-score)))
 
 
-(defun flx-propertize (str score &optional add-score)
-  "Return propertized string according to score."
+(defun flx-propertize (obj score &optional add-score)
+  "Return propertized copy of obj according to score.
+
+SCORE of nil means to clear the properties."
   (let ((block-started (cadr score))
-        (last-char nil))
-    (loop for char in (cdr score)
-          do (progn
-               (when (and last-char
-                          (not (= (1+ last-char) char)))
-                 (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
-                 (setq block-started char))
-               (setq last-char char)))
-    (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
-    (when add-score
-      (setq str (format "%s [%s]" str (car score))))
-    str))
+        (last-char nil)
+        (str (if (consp obj)
+                 (substring-no-properties (car obj))
+               (substring-no-properties obj))))
+
+    (unless (null score)
+      (loop for char in (cdr score)
+            do (progn
+                 (when (and last-char
+                            (not (= (1+ last-char) char)))
+                   (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+                   (setq block-started char))
+                 (setq last-char char)))
+      (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+      (when add-score
+        (setq str (format "%s [%s]" str (car score)))))
+    (if (consp obj)
+        (cons str (cdr obj))
+      str)))
 
 
 

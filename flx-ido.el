@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 23
+;;     Update #: 30
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -118,20 +118,17 @@ item, in which case, the ending items are deleted."
 
 
 (defun flx-ido-decorate (things &optional clear)
-  (if (consp (car-safe (car things)))
-      (mapcar 'car things)
-    (let ((decorate-count (min ido-max-prospects
-                               (length things))))
-      (nconc
-       (loop for thing in things
-             for i from 0 below decorate-count
-             collect (if clear
-                         (substring-no-properties thing)
-                       ;; copy the string in case it's "pure"
-                       (flx-propertize (copy-sequence (car thing)) (cdr thing))))
-       (if clear
-           (nthcdr decorate-count things)
-         (mapcar 'car (nthcdr decorate-count things)))))))
+  (let ((decorate-count (min ido-max-prospects
+                             (length things))))
+    (nconc
+     (loop for thing in things
+           for i from 0 below decorate-count
+           collect (if clear
+                       (flx-propertize thing nil)
+                     (flx-propertize (car thing) (cdr thing))))
+     (if clear
+         (nthcdr decorate-count things)
+       (mapcar 'car (nthcdr decorate-count things))))))
 
 (defun flx-ido-match-internal (query items)
   (let* ((matches (loop for item in items
