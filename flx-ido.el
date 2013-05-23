@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 32
+;;     Update #: 34
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -85,10 +85,10 @@ item, in which case, the ending items are deleted."
 
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal))
 
-(defun flx-ido-narrowed (items)
+(defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
-  (let ((query-key (flx-ido-key-for-query))
+  (let ((query-key (flx-ido-key-for-query query))
         best-match
         exact
         res)
@@ -142,31 +142,27 @@ item, in which case, the ending items are deleted."
                        (sort matches
                              (lambda (x y) (> (cadr x) (cadr y))))))))
 
-(defun flx-ido-key-for-query ()
-  (if (boundp 'prompt)
-      (buffer-substring-no-properties (+ (point-min)
-                                         (length prompt))
-                                      (point))
-    ido-text))
+(defun flx-ido-key-for-query (query)
+  (concat ido-current-directory query))
 
-(defun flx-ido-cache (items)
+(defun flx-ido-cache (query items)
   (if (consp (car items))
       items
-    (puthash (flx-ido-key-for-query) items flx-ido-narrowed-matches-hash)))
+    (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash)))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
   (when (and (equal "" query)
-             (not (gethash (flx-ido-key-for-query)
+             (not (gethash (flx-ido-key-for-query query)
                            flx-ido-narrowed-matches-hash)))
     ;; original function reverses list.
     (setq items (nreverse (ido-delete-runs items)))
-    (flx-ido-cache items))
+    (flx-ido-cache query items))
   (destructuring-bind (exact res-items)
-      (flx-ido-narrowed items)
+      (flx-ido-narrowed query items)
     (if exact                         ; `ido-rotate' case is covered by exact match
         res-items
-      (flx-ido-cache (flx-ido-match-internal query res-items)))))
+      (flx-ido-cache query (flx-ido-match-internal query res-items)))))
 
 (defvar flx-ido-use t
   "Use flx matching for ido.")
