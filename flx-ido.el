@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 34
+;;     Update #: 35
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -88,30 +88,32 @@ item, in which case, the ending items are deleted."
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
-  (let ((query-key (flx-ido-key-for-query query))
-        best-match
-        exact
-        res)
-    (loop for key being the hash-key of flx-ido-narrowed-matches-hash
-          do (when (and (>= (length query-key) (length key))
-                        (eq t
-                            (compare-strings query-key 0 (min (length query-key)
-                                                          (length key))
-                                             key 0 nil))
-                        (or (null best-match)
-                            (> (length key) (length best-match))))
-               (setq best-match key)
-               (when (= (length key)
-                        (length query-key))
-                 (setq exact t)
-                 (return))))
-    (setq res (cond (exact
-                     (gethash best-match flx-ido-narrowed-matches-hash))
-                    (best-match
-                     (flx-ido-undecorate (gethash best-match flx-ido-narrowed-matches-hash)))
-                    (t
-                     (flx-ido-undecorate items))))
-    (list exact res)))
+  (if (zerop (length query))
+      (list t (nreverse items))
+    (let ((query-key (flx-ido-key-for-query query))
+          best-match
+          exact
+          res)
+      (loop for key being the hash-key of flx-ido-narrowed-matches-hash
+            do (when (and (>= (length query-key) (length key))
+                          (eq t
+                              (compare-strings query-key 0 (min (length query-key)
+                                                                (length key))
+                                               key 0 nil))
+                          (or (null best-match)
+                              (> (length key) (length best-match))))
+                 (setq best-match key)
+                 (when (= (length key)
+                          (length query-key))
+                   (setq exact t)
+                   (return))))
+      (setq res (cond (exact
+                       (gethash best-match flx-ido-narrowed-matches-hash))
+                      (best-match
+                       (flx-ido-undecorate (gethash best-match flx-ido-narrowed-matches-hash)))
+                      (t
+                       (flx-ido-undecorate items))))
+      (list exact res))))
 
 (defun flx-ido-undecorate (strings)
   (flx-ido-decorate strings t))
@@ -152,17 +154,11 @@ item, in which case, the ending items are deleted."
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
-  (when (and (equal "" query)
-             (not (gethash (flx-ido-key-for-query query)
-                           flx-ido-narrowed-matches-hash)))
-    ;; original function reverses list.
-    (setq items (nreverse (ido-delete-runs items)))
-    (flx-ido-cache query items))
   (destructuring-bind (exact res-items)
       (flx-ido-narrowed query items)
-    (if exact                         ; `ido-rotate' case is covered by exact match
-        res-items
-      (flx-ido-cache query (flx-ido-match-internal query res-items)))))
+    (flx-ido-cache query (if exact
+                             res-items
+                           (flx-ido-match-internal query res-items)))))
 
 (defvar flx-ido-use t
   "Use flx matching for ido.")
