@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 39
+;;     Update #: 44
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -148,7 +148,9 @@ item, in which case, the ending items are deleted."
   (concat ido-current-directory query))
 
 (defun flx-ido-cache (query items)
-  (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash))
+  (if (memq ido-cur-item '(file dir))
+      items
+    (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash)))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
