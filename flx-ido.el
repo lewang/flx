@@ -148,9 +148,7 @@ item, in which case, the ending items are deleted."
   (concat ido-current-directory query))
 
 (defun flx-ido-cache (query items)
-  (if (consp (car items))
-      items
-    (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash)))
+  (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
