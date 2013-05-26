@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 44
+;;     Update #: 49
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -23,8 +23,9 @@
 ;; Add to your init file:
 ;;
 ;;     (require 'flx-ido)
-;;     (setq ido-enable-flex-matching t
-;;           flx-ido-use              t)
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (flx-ido-mode 1)
 ;;
 ;;
 
@@ -160,16 +161,13 @@ item, in which case, the ending items are deleted."
                              res-items
                            (flx-ido-match-internal query res-items)))))
 
-(defvar flx-ido-use t
-  "Use flx matching for ido.")
-
 (defadvice ido-exit-minibuffer (around flx-ido-undecorate activate)
   "Remove flx properties after."
   (let* ((obj (car ido-matches))
          (str (if (consp obj)
                   (car obj)
                 obj)))
-    (when (and flx-ido-use str)
+    (when (and flx-ido-mode str)
       (remove-text-properties 0 (length str)
                               '(face flx-highlight-face) str)))
 
@@ -179,16 +177,23 @@ item, in which case, the ending items are deleted."
   "Clear flx narrowed hash beforehand.
 
 Remove flx properties after."
-  (when flx-ido-use
+  (when flx-ido-mode
     (clrhash flx-ido-narrowed-matches-hash))
   ad-do-it)
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and my-ido-fuzzy-match"
-  (if (and flx-ido-use
-           ido-enable-flex-matching)
+  (if flx-ido-mode
       (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0)))
     ad-do-it))
+
+;;;###autoload
+(define-minor-mode flx-ido-mode
+  "Toggle flx ido mode"
+  :init-value nil
+  :lighter ""
+  :group 'ido
+  :global t)
 
 (provide 'flx-ido)
 
