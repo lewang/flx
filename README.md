@@ -1,9 +1,11 @@
 [![Build Status](https://travis-ci.org/lewang/flx.png)](http://travis-ci.org/lewang/flx)
 
-# This is an early alpha
+# Status
 
-It's unlikely to crash your Emacs, but do expect to encounter bugs.
+This project is in its infancy yet.  It's unlikely to crash your Emacs, but do
+expect to encounter bugs.
 
+# Screencast
 
 [Screencast showing rationale and ido workflow][]
 
