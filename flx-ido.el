@@ -10,10 +10,10 @@
 ;; Maintainer: Le Wang
 
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
-;; Version: 0.1
+;; Version: 0.2
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 51
+;;     Update #: 52
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
