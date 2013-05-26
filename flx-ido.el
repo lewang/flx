@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 49
+;;     Update #: 51
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -26,6 +26,9 @@
 ;;     (ido-mode 1)
 ;;     (ido-everywhere 1)
 ;;     (flx-ido-mode 1)
+;;     ;; disable ido faces to see flx highlights.
+;;     (setq ido-use-faces nil)
+;;
 ;;
 ;;
 
