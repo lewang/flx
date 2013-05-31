@@ -13,7 +13,7 @@
 ;; Version: 0.2
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 55
+;;     Update #: 57
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -141,7 +141,9 @@ item, in which case, the ending items are deleted."
          (if clear
              (nthcdr decorate-count things)
            (mapcar 'car (nthcdr decorate-count things)))))
-    (mapcar 'car things)))
+    (if clear
+        things
+      (mapcar 'car things))))
 
 (defun flx-ido-match-internal (query items)
   (let* ((matches (loop for item in items
@@ -190,6 +192,11 @@ Remove flx properties after."
   (when flx-ido-mode
     (clrhash flx-ido-narrowed-matches-hash))
   ad-do-it)
+
+(defadvice ido-restrict-to-matches (after flx-ido-reset-hash activate)
+  "Clear flx narrowed hash."
+  (when flx-ido-mode
+    (clrhash flx-ido-narrowed-matches-hash)))
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and my-ido-fuzzy-match"
