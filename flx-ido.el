@@ -13,7 +13,7 @@
 ;; Version: 0.2
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 52
+;;     Update #: 55
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -67,6 +67,11 @@
 (eval-when-compile (require 'cl))
 (require 'ido)
 (require 'flx)
+
+
+(defcustom flx-ido-use-faces t
+  "Use `flx-highlight-face' to indicate characters contributing to best score."
+  :group 'ido)
 
 (unless (fboundp 'ido-delete-runs)
   (defun ido-delete-runs (list)
@@ -124,17 +129,19 @@ item, in which case, the ending items are deleted."
 
 
 (defun flx-ido-decorate (things &optional clear)
-  (let ((decorate-count (min ido-max-prospects
-                             (length things))))
-    (nconc
-     (loop for thing in things
-           for i from 0 below decorate-count
-           collect (if clear
-                       (flx-propertize thing nil)
-                     (flx-propertize (car thing) (cdr thing))))
-     (if clear
-         (nthcdr decorate-count things)
-       (mapcar 'car (nthcdr decorate-count things))))))
+  (if flx-ido-use-faces
+      (let ((decorate-count (min ido-max-prospects
+                                 (length things))))
+        (nconc
+         (loop for thing in things
+               for i from 0 below decorate-count
+               collect (if clear
+                           (flx-propertize thing nil)
+                         (flx-propertize (car thing) (cdr thing))))
+         (if clear
+             (nthcdr decorate-count things)
+           (mapcar 'car (nthcdr decorate-count things)))))
+    (mapcar 'car things)))
 
 (defun flx-ido-match-internal (query items)
   (let* ((matches (loop for item in items
