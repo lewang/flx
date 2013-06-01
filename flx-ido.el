@@ -193,7 +193,7 @@ Remove flx properties after."
     (clrhash flx-ido-narrowed-matches-hash))
   ad-do-it)
 
-(defadvice ido-restrict-to-matches (after flx-ido-reset-hash activate)
+(defadvice ido-restrict-to-matches (before flx-ido-reset-hash activate)
   "Clear flx narrowed hash."
   (when flx-ido-mode
     (clrhash flx-ido-narrowed-matches-hash)))
