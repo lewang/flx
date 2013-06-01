@@ -13,7 +13,7 @@
 ;; Version: 0.2
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 57
+;;     Update #: 60
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -185,13 +185,10 @@ item, in which case, the ending items are deleted."
 
   ad-do-it)
 
-(defadvice ido-read-internal (around flx-ido-reset-hash activate)
-  "Clear flx narrowed hash beforehand.
-
-Remove flx properties after."
+(defadvice ido-read-internal (before flx-ido-reset-hash activate)
+  "Clear flx narrowed hash beforehand."
   (when flx-ido-mode
-    (clrhash flx-ido-narrowed-matches-hash))
-  ad-do-it)
+    (clrhash flx-ido-narrowed-matches-hash)))
 
 (defadvice ido-restrict-to-matches (before flx-ido-reset-hash activate)
   "Clear flx narrowed hash."
