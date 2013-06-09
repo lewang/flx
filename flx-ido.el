@@ -10,10 +10,10 @@
 ;; Maintainer: Le Wang
 
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
-;; Version: 0.1
+;; Version: 0.2
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 2
+;;     Update #: 60
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -23,8 +23,12 @@
 ;; Add to your init file:
 ;;
 ;;     (require 'flx-ido)
-;;     (setq ido-enable-flex-matchint t
-;;           flx-ido-use              t)
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (flx-ido-mode 1)
+;;     ;; disable ido faces to see flx highlights.
+;;     (setq ido-use-faces nil)
+;;
 ;;
 ;;
 
@@ -64,26 +68,52 @@
 (require 'ido)
 (require 'flx)
 
+
+(defcustom flx-ido-use-faces t
+  "Use `flx-highlight-face' to indicate characters contributing to best score."
+  :group 'ido)
+
+(unless (fboundp 'ido-delete-runs)
+  (defun ido-delete-runs (list)
+    "Delete consecutive runs of same item in list.
+Comparison done with `equal'.  Runs may loop back on to the first
+item, in which case, the ending items are deleted."
+    (let ((tail list)
+          before-last-run)
+      (while tail
+        (if (consp (cdr tail))
+            (if (equal (car tail) (cadr tail))
+                (setcdr tail (cddr tail))
+              (setq before-last-run tail)
+              (setq tail (cdr tail)))
+          (setq tail (cdr tail))))
+      (when (and before-last-run
+                 (equal (car list) (cadr before-last-run)))
+        (setcdr before-last-run nil)))
+    list))
+
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal))
 
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
   (if (zerop (length query))
-      (list t (flx-ido-undecorate items))
-    (let (best-match
+      (list t (nreverse items))
+    (let ((query-key (flx-ido-key-for-query query))
+          best-match
           exact
           res)
       (loop for key being the hash-key of flx-ido-narrowed-matches-hash
-            do (when (and (>= (length query) (length key))
+            do (when (and (>= (length query-key) (length key))
                           (eq t
-                              (compare-strings query 0 (min (length query)
-                                                            (length key))
+                              (compare-strings query-key 0 (min (length query-key)
+                                                                (length key))
                                                key 0 nil))
-                          (> (length key) (length best-match)))
+                          (or (null best-match)
+                              (> (length key) (length best-match))))
                  (setq best-match key)
                  (when (= (length key)
-                          (length query))
+                          (length query-key))
                    (setq exact t)
                    (return))))
       (setq res (cond (exact
@@ -99,49 +129,85 @@
 
 
 (defun flx-ido-decorate (things &optional clear)
-  (let ((decorate-count (min ido-max-prospects
-                             (length things))))
-    (nconc
-     (loop for thing in things
-           for i from 0 below decorate-count
-           collect (if clear
-                       (substring-no-properties thing)
-                     ;; copy the string in case it's "pure"
-                     (flx-propertize (copy-sequence (car thing)) (cdr thing))))
-     (if clear
-         (nthcdr decorate-count things)
-       (mapcar 'car (nthcdr decorate-count things))))))
+  (if flx-ido-use-faces
+      (let ((decorate-count (min ido-max-prospects
+                                 (length things))))
+        (nconc
+         (loop for thing in things
+               for i from 0 below decorate-count
+               collect (if clear
+                           (flx-propertize thing nil)
+                         (flx-propertize (car thing) (cdr thing))))
+         (if clear
+             (nthcdr decorate-count things)
+           (mapcar 'car (nthcdr decorate-count things)))))
+    (if clear
+        things
+      (mapcar 'car things))))
+
+(defun flx-ido-match-internal (query items)
+  (let* ((matches (loop for item in items
+                        for string = (if (consp item) (car item) item)
+                        for score = (flx-score string query flx-file-cache)
+                        if score
+                        collect (cons item score)
+                        into matches
+                        finally return matches)))
+    (flx-ido-decorate (ido-delete-runs
+                       (sort matches
+                             (lambda (x y) (> (cadr x) (cadr y))))))))
+
+(defun flx-ido-key-for-query (query)
+  (concat ido-current-directory query))
+
+(defun flx-ido-cache (query items)
+  (if (memq ido-cur-item '(file dir))
+      items
+    (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash)))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
-  (destructuring-bind (exact items)
+  (destructuring-bind (exact res-items)
       (flx-ido-narrowed query items)
-    (if exact                         ; `ido-rotate' case is covered by exact match
-        items
-      (let* ((matches (loop for item in items
-                            for score = (flx-score item query flx-file-cache)
-                            if score
-                            collect (cons item score)
-                            into matches
-                            finally return matches))
-             res)
-        (setq res (flx-ido-decorate (sort matches
-                                          (lambda (x y) (> (cadr x) (cadr y))))))
-        (puthash query res flx-ido-narrowed-matches-hash)))))
+    (flx-ido-cache query (if exact
+                             res-items
+                           (flx-ido-match-internal query res-items)))))
 
-(defvar flx-ido-use t
-  "Use flx matching for ido.")
+(defadvice ido-exit-minibuffer (around flx-ido-undecorate activate)
+  "Remove flx properties after."
+  (let* ((obj (car ido-matches))
+         (str (if (consp obj)
+                  (car obj)
+                obj)))
+    (when (and flx-ido-mode str)
+      (remove-text-properties 0 (length str)
+                              '(face flx-highlight-face) str)))
+
+  ad-do-it)
 
 (defadvice ido-read-internal (before flx-ido-reset-hash activate)
-  "clear our narrowed hash."
-  (clrhash flx-ido-narrowed-matches-hash))
+  "Clear flx narrowed hash beforehand."
+  (when flx-ido-mode
+    (clrhash flx-ido-narrowed-matches-hash)))
+
+(defadvice ido-restrict-to-matches (before flx-ido-reset-hash activate)
+  "Clear flx narrowed hash."
+  (when flx-ido-mode
+    (clrhash flx-ido-narrowed-matches-hash)))
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and my-ido-fuzzy-match"
-  (if (and flx-ido-use
-           ido-enable-flex-matching)
+  (if flx-ido-mode
       (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0)))
     ad-do-it))
+
+;;;###autoload
+(define-minor-mode flx-ido-mode
+  "Toggle flx ido mode"
+  :init-value nil
+  :lighter ""
+  :group 'ido
+  :global t)
 
 (provide 'flx-ido)
 

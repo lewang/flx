@@ -13,7 +13,7 @@
 ;; Version: 0.1
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 3
+;;     Update #: 17
 ;; URL:
 ;; Keywords:
 ;; Compatibility:
@@ -100,8 +100,9 @@
             (<= ?A char))))
 
 (defsubst flx-is-boundary (last-char char)
-  (or (flx-is-capital char)
-      (null last-char)
+  (or (null last-char)
+      (and (not (flx-is-capital last-char))
+           (flx-is-capital char))
       (and (not (flx-is-word last-char))
            (flx-is-word char))))
 
@@ -168,11 +169,16 @@ See documentation for logic."
       (loop for group in groups-alist
             for index from separator-count downto 0
             with last-group-limit = nil
+            with basepath-found = nil
             do (let ((group-start (car group))
                      (word-count (cadr group))
                      ;; this is the number of effective word groups
                      (words-length (length (cddr group)))
-                     (basepath-p (not last-group-limit)))
+                     basepath-p)
+                 (when (and (not (zerop words-length))
+                            (not basepath-found))
+                   (setq basepath-found t)
+                   (setq basepath-p t))
                  (let (num)
                    (setq num
                          (if basepath-p
@@ -279,17 +285,26 @@ e.g. (\"aab\" \"ab\") returns
 
 (defun flx-score (str query &optional cache)
   "return best score matching QUERY against STR"
+  (setq query (downcase query))
   (unless (or (zerop (length query))
               (zerop (length str)))
     (let* ((info-hash (flx-process-cache str cache))
            (heatmap (gethash 'heatmap info-hash))
            (matches (flx-get-matches info-hash query))
+           (query-length (length query))
+           (full-match-boost (and (< query-length 5)
+                                  (> query-length 1)))
            (best-score nil))
-      (mapc (lambda (match-vector)
-              (let ((score 0)
+      (mapc (lambda (match-positions)
+              (let ((score (if (and
+                                full-match-boost
+                                (= (length match-positions)
+                                   (length str)))
+                               10000
+                             0))
                     (contiguous-count 0)
                     last-match)
-                (loop for index in match-vector
+                (loop for index in match-positions
                       do (progn
                            (if (and last-match
                                     (= (1+ last-match) index))
@@ -301,26 +316,35 @@ e.g. (\"aab\" \"ab\") returns
                            (setq last-match index)))
                 (if (or (null best-score)
                         (> score (car best-score)))
-                    (setq best-score (cons score match-vector)))))
+                    (setq best-score (cons score match-positions)))))
             matches)
       best-score)))
 
 
-(defun flx-propertize (str score &optional add-score)
-  "Return propertized string according to score."
+(defun flx-propertize (obj score &optional add-score)
+  "Return propertized copy of obj according to score.
+
+SCORE of nil means to clear the properties."
   (let ((block-started (cadr score))
-        (last-char nil))
-    (loop for char in (cdr score)
-          do (progn
-               (when (and last-char
-                          (not (= (1+ last-char) char)))
-                 (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
-                 (setq block-started char))
-               (setq last-char char)))
-    (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
-    (when add-score
-      (setq str (format "%s [%s]" str (car score))))
-    str))
+        (last-char nil)
+        (str (if (consp obj)
+                 (substring-no-properties (car obj))
+               (substring-no-properties obj))))
+
+    (unless (null score)
+      (loop for char in (cdr score)
+            do (progn
+                 (when (and last-char
+                            (not (= (1+ last-char) char)))
+                   (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+                   (setq block-started char))
+                 (setq last-char char)))
+      (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+      (when add-score
+        (setq str (format "%s [%s]" str (car score)))))
+    (if (consp obj)
+        (cons str (cdr obj))
+      str)))
 
 
 
