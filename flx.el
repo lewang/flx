@@ -91,7 +91,7 @@
 (defsubst flx-is-word (char)
   "returns t if char is word"
   (and char
-       (not (memq char '(?\  ?- ?_ ?. ?/ ?\\)))))
+       (not (memq char '(?\  ?- ?_ ?: ?. ?/ ?\\)))))
 
 (defsubst flx-is-capital (char)
   "returns t if char is word"
