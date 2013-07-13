@@ -1,17 +1,17 @@
 [![Build Status](https://travis-ci.org/lewang/flx.png)](http://travis-ci.org/lewang/flx)
 
-# Status
+## Status
 
 This project is in its infancy yet.  It's unlikely to crash your Emacs, but do
 expect to encounter bugs.
 
-# Screencast
+## Screencast
 
 [Screencast showing rationale and ido workflow][]
 
-# Memory Usage
+## Memory Usage
 
-The flx algorithm willingly sacrifices memory usage for speed.
+The `flx` algorithm willingly sacrifices memory usage for speed.
 
 For 10k file names, about 10 MB of memory will be used to speed up future
 matching.  This memory is never released to keep the match speed fast.
@@ -20,27 +20,28 @@ So far with modern computers, this feels like a reasonable design decision.
 
 It may change in future.
 
+## GC Optimization
 
-# GC Optimization
-
-Emacs garbage collector is fairly primitive stop the world type.  GC time can
+Emacs's garbage collector is fairly primitive stop the world type.  GC time can
 contribute significantly to the run-time of computation that allocates and
 frees a lot of memory.
 
-Consider:
+Consider the following example:
 
-    (defun uuid ()
-      (format "%08x-%08x-%08x-%08x"
-              (random (expt 16 4))
-              (random (expt 16 4))
-              (random (expt 16 4))
-              (random (expt 16 4))))
+```lisp
+(defun uuid ()
+  (format "%08x-%08x-%08x-%08x"
+          (random (expt 16 4))
+          (random (expt 16 4))
+          (random (expt 16 4))
+          (random (expt 16 4))))
 
-    (benchmark-run 1
-      (let ((cache (flx-make-filename-cache)))
-        (dolist (i (number-sequence 0 10000))
-          (flx-process-cache (uuid) cache))))
-            ;;; ⇒ (0.899678 9 0.33650300000000044)
+(benchmark-run 1
+  (let ((cache (flx-make-filename-cache)))
+    (dolist (i (number-sequence 0 10000))
+      (flx-process-cache (uuid) cache))))
+        ;;; ⇒ (0.899678 9 0.33650300000000044)
+```
 
 This means that roughly 30% of time is spent just doing garbage-collection.
 
@@ -48,47 +49,83 @@ This means that roughly 30% of time is spent just doing garbage-collection.
 
 By default Emacs will initiate GC every 0.76 MB allocated (`gc-cons-threshold`
 == 800000).  If we increase this to 20 MB (`gc-cons-threshold` == 20000000)
+we get:
 
-We get:
+````lisp
+(benchmark-run 1
+  (setq gc-cons-threshold 20000000)
+  (let ((cache (flx-make-filename-cache)))
+    (dolist (i (number-sequence 0 10000))
+      (flx-process-cache (uuid) cache))))
+    ;;; ⇒ (0.62035 1 0.05461100000000041)
+```
 
-    (benchmark-run 1
-      (setq gc-cons-threshold 20000000)
-      (let ((cache (flx-make-filename-cache)))
-        (dolist (i (number-sequence 0 10000))
-          (flx-process-cache (uuid) cache))))
-        ;;; ⇒ (0.62035 1 0.05461100000000041)
+So if you have a modern machine, I encourage you to add the following:
 
-So if you have a modern machine, I encourage you to add
-
-    (setq gc-cons-threshold 20000000)
+```lisp
+(setq gc-cons-threshold 20000000)
+```
 
 to your init file.
 
-# ido support
+## Installation
+
+### Manual
+
+Just drop all `.el` files somewhere on your `load-path`. Here's an
+example using the folder `~/.emacs.d/vendor`:
+
+```lisp
+(add-to-list 'load-path "~/emacs.d/vendor")
+```
+
+### MELPA
+
+If you're an Emacs 24 user or you have a recent version of `package.el`
+you can install `flx` from the
+[MELPA](http://melpa.milkbox.net) repository. The version of
+`flx` there will always be up-to-date.
+
+### Emacs Prelude
+
+`flx` is part of the
+[Emacs Prelude](https://github.com/bbatsov/prelude). If you're a Prelude
+user - `flx` is already properly configured and ready for
+action.
+
+## ido support
 
 Add this to your init file and *flx* match will be enabled for ido.
 
-    (require 'flx-ido)
-    (ido-mode 1)
-    (ido-everywhere 1)
-    (flx-ido-mode 1)
-    ;; disable ido faces to see flx highlights.
-    (setq ido-use-faces nil)
+```lisp
+(require 'flx-ido)
+(ido-mode 1)
+(ido-everywhere 1)
+(flx-ido-mode 1)
+;; disable ido faces to see flx highlights.
+(setq ido-use-faces nil)
+```
 
+If don't want to use the `flx`'s highlights you can turn them off like this:
 
+```lisp
+(setq flx-ido-use-faces nil)
+```
 
-# helm support
+## Helm support
 
-Helm is not supported yet.  There is a demo showing how it could work, but I'm
+[Helm][] is not supported yet.  There is a demo showing how it could work, but I'm
 still working through how to integrate it into helm.
 
 The Helm demo shows the score of the top 20 matches.
 
-# outstanding issues
+## Outstanding issues
 
-## very large collections are slow
+### Very large collections are slow
 
 see `flx-ido-big-demo` for example.
 
 There may be optimization opportunities in the matcher.
+
 [Screencast showing rationale and ido workflow]: http://www.youtube.com/watch?v=_swuJ1RuMgk
+[Helm]: https://github.com/emacs-helm/helm
