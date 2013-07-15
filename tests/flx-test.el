@@ -1,37 +1,17 @@
-;;; flx-test.el ---
+;;; flx-test.el --- flx ert unit tests
 
-;; this file is not part of Emacs
+;; Copyright © 2013 Le Wang
 
-;; Copyright (C) 2013 Le Wang
 ;; Author: Le Wang
 ;; Maintainer: Le Wang
-;; Description:
-;; Author: Le Wang
-;; Maintainer: Le Wang
-
+;; Description: fuzzy matching with good sorting
 ;; Created: Tue Apr 16 23:32:32 2013 (+0800)
-;; Version: 0.1
-;; Last-Updated:
-;;           By:
-;;     Update #: 10
-;; URL:
-;; Keywords:
-;; Compatibility:
+;; URL: https://github.com/lewang/flx
 
-;;; Installation:
+;; This file is NOT part of GNU Emacs.
 
-;;
-;;
-;;
+;;; License
 
-;;; Commentary:
-
-;;
-;;
-;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 3, or
@@ -46,8 +26,8 @@
 ;; along with this program; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Commentary:
 
 ;;; Code:
 
@@ -70,23 +50,23 @@
              h)
     (should (= 3 count))))
 
-(ert-deftest flx-is-boundary ()
-  (should (flx-is-boundary ?/ ?a))
-  (should (flx-is-boundary nil ?a))
-  (should-not (flx-is-boundary ?a ?/))
-  (should (flx-is-boundary ?/ ?A))
-  (should (flx-is-boundary ?a ?A)))
+(ert-deftest flx-boundary-p ()
+  (should (flx-boundary-p ?/ ?a))
+  (should (flx-boundary-p nil ?a))
+  (should-not (flx-boundary-p ?a ?/))
+  (should (flx-boundary-p ?/ ?A))
+  (should (flx-boundary-p ?a ?A)))
 
-(ert-deftest flx-is-capital ()
-  (should (flx-is-capital ?A))
-  (should (flx-is-capital ?Z))
-  (should-not (flx-is-capital ?_))
-  (should-not (flx-is-capital ?a)))
+(ert-deftest flx-capital-p ()
+  (should (flx-capital-p ?A))
+  (should (flx-capital-p ?Z))
+  (should-not (flx-capital-p ?_))
+  (should-not (flx-capital-p ?a)))
 
-(ert-deftest flx-is-word ()
-  (should (flx-is-word ?a))
-  (should (flx-is-word ?A))
-  (should-not (flx-is-word ?_)))
+(ert-deftest flx-word-p ()
+  (should (flx-word-p ?a))
+  (should (flx-word-p ?A))
+  (should-not (flx-word-p ?_)))
 
 (ert-deftest flx-inc-vec ()
   "roll and unroll should be bring back original score"
