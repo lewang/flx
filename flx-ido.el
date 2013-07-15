@@ -37,7 +37,8 @@
 
 ;; Scott Frazer's blog entry http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
 ;; provided a lot of inspiration.
-;; ido-hacks was helpful for ido optimization
+;;
+;; ido-hacks was helpful for ido optimization and fontification ideas
 
 ;;; Installation:
 
