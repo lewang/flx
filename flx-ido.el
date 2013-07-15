@@ -57,6 +57,10 @@
 (require 'ido)
 (require 'flx)
 
+(defcustom flx-ido-threshhold 6000
+  "flx will not kick in until collection is filtered below this size with \"flex\"."
+  :group 'ido)
+
 
 (defcustom flx-ido-use-faces t
   "Use `flx-highlight-face' to indicate characters contributing to best score."
@@ -135,16 +139,23 @@ item, in which case, the ending items are deleted."
       (mapcar 'car things))))
 
 (defun flx-ido-match-internal (query items)
-  (let* ((matches (loop for item in items
-                        for string = (if (consp item) (car item) item)
-                        for score = (flx-score string query flx-file-cache)
-                        if score
-                        collect (cons item score)
-                        into matches
-                        finally return matches)))
-    (flx-ido-decorate (ido-delete-runs
-                       (sort matches
-                             (lambda (x y) (> (cadr x) (cadr y))))))))
+  (if (< (length items) flx-ido-threshhold)
+      (let* ((matches (loop for item in items
+                            for string = (if (consp item) (car item) item)
+                            for score = (flx-score string query flx-file-cache)
+                            if score
+                            collect (cons item score)
+                            into matches
+                            finally return matches)))
+        (flx-ido-decorate (ido-delete-runs
+                           (sort matches
+                                 (lambda (x y) (> (cadr x) (cadr y)))))))
+    (let ((regexp (mapconcat 'identity (split-string query "" t) ".*")))
+      (loop for item in items
+            if (string-match regexp (if (consp item) (car item) item))
+            collect item
+            into matches
+            finally return matches))))
 
 (defun flx-ido-key-for-query (query)
   (concat ido-current-directory query))
