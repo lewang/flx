@@ -1,45 +1,18 @@
 ;;; flx-ido.el --- flx integration for ido
 
-;; this file is not part of Emacs
+;; Copyright © 2013 Le Wang
 
-;; Copyright (C) 2013 Le Wang
 ;; Author: Le Wang
 ;; Maintainer: Le Wang
 ;; Description: flx integration for ido
-;; Author: Le Wang
-;; Maintainer: Le Wang
-
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
 ;; Version: 0.2
-;; Last-Updated:
-;;           By:
-;;     Update #: 60
-;; URL:
-;; Keywords:
-;; Compatibility:
+;; URL: https://github.com/lewang/flx
 
-;;; Installation:
+;; This file is NOT part of GNU Emacs.
 
-;; Add to your init file:
-;;
-;;     (require 'flx-ido)
-;;     (ido-mode 1)
-;;     (ido-everywhere 1)
-;;     (flx-ido-mode 1)
-;;     ;; disable ido faces to see flx highlights.
-;;     (setq ido-use-faces nil)
-;;
-;;
-;;
+;;; License
 
-;;; Commentary:
-
-;;
-;;
-;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 3, or
@@ -54,13 +27,28 @@
 ;; along with this program; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
+
+;;; Commentary:
+
+;; This package provides a more powerful alternative to `ido-mode''s
+;; built-in flex matching.
+
+;;; Acknowledgments
+
+;; Scott Frazer's blog entry http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
+;; provided a lot of inspiration.
+;; ido-hacks was helpful for ido optimization
+
+;;; Installation:
+
+;; Add the following code to your init file:
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;
-;;; credit to Scott Frazer's blog entry here:http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
-;;;
-
+;;     (require 'flx-ido)
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (flx-ido-mode 1)
+;;     ;; disable ido faces to see flx highlights.
+;;     (setq ido-use-faces nil)
 
 ;;; Code:
 
@@ -211,8 +199,4 @@ item, in which case, the ending items are deleted."
 
 (provide 'flx-ido)
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; flx-ido.el ends here
-
