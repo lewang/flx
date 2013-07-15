@@ -1,37 +1,18 @@
 ;;; flx.el --- fuzzy matching with good sorting
 
-;; this file is not part of Emacs
+;; Copyright © 2013 Le Wang
 
-;; Copyright (C) 2013 Le Wang
 ;; Author: Le Wang
 ;; Maintainer: Le Wang
 ;; Description: fuzzy matching with good sorting
-;; Author: Le Wang
-;; Maintainer: Le Wang
-
 ;; Created: Wed Apr 17 01:01:41 2013 (+0800)
 ;; Version: 0.1
-;; Last-Updated:
-;;           By:
-;;     Update #: 17
-;; URL:
-;; Keywords:
-;; Compatibility:
+;; URL: https://github.com/lewang/flx
 
-;;; Installation:
+;; This file is NOT part of GNU Emacs.
 
-;;
-;;
-;;
+;;; License
 
-;;; Commentary:
-
-;;
-;;
-;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 3, or
@@ -46,26 +27,27 @@
 ;; along with this program; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
+
+;;; Commentary:
+
+;; Implementation notes
+;; --------------------
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Use defsubst instead of defun
+;;
+;; * Using bitmaps to check for matches worked out to be SLOWER than just
+;;   scanning the string and using `flx-get-matches'.
+;;
+;; * Consing causes GC, which can often slowdown Emacs more than the benefits
+;;   of an optimization.
+
+;;; Acknowledgments
+
+;; Scott Frazer's blog entry http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
+;; provided a lot of inspiration.
+;; ido-hacks was helpful for ido optimization
 
 ;;; Code:
-
-
-
-;;; credit to scott frazer's blog entry here:http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
-;;; credit to ido-hacks for ido optimization
-
-;;; Use defsubst instead of defun
-
-;;; Notes:
-;;;
-;;; * Using bitmaps to check for matches worked out to be SLOWER than just
-;;;   scanning the string and using `flx-get-matches'.
-;;;
-;;; * Consing causes GC, which can often slowdown Emacs more than the benefits
-;;;   of an optimization.
-;;;
 
 (eval-when-compile (require 'cl))
 
@@ -358,12 +340,4 @@ SCORE of nil means to clear the properties."
 
 (provide 'flx)
 
-
-
-
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; flx.el ends here
