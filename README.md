@@ -112,6 +112,21 @@ If don't want to use the `flx`'s highlights you can turn them off like this:
 (setq flx-ido-use-faces nil)
 ```
 
+### Flx uses a complex matching heuristics which can be slow for large collections
+
+Customize `flx-ido-threshhold` to change the collection size above which flx
+will revert to flex matching.
+
+As soon as the collection is narrowed below `flx-ido-threshhold`, flx will
+kick in again.
+
+As a point of reference for a 2.3 GHz quad-core i7 processor, a value of
+`10000` still provides a reasonable completion experience.
+
+- see `flx-ido-big-demo` for example with 36k string (Emacs 24.3).
+
+
+
 ## Helm support
 
 [Helm][] is not supported yet.  There is a demo showing how it could work, but I'm
@@ -119,13 +134,6 @@ still working through how to integrate it into helm.
 
 The Helm demo shows the score of the top 20 matches.
 
-## Outstanding issues
-
-### Very large collections are slow
-
-see `flx-ido-big-demo` for example.
-
-There may be optimization opportunities in the matcher.
 
 [Screencast showing rationale and ido workflow]: http://www.youtube.com/watch?v=_swuJ1RuMgk
 [Helm]: https://github.com/emacs-helm/helm
