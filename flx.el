@@ -70,23 +70,26 @@
     res))
 
 ;;; Do we need more word separators than ST?
-(defsubst flx-is-word (char)
-  "returns t if char is word"
+(defsubst flx-word-p (char)
+  "Check if CHAR is a word character."
   (and char
        (not (memq char '(?\  ?- ?_ ?: ?. ?/ ?\\)))))
 
-(defsubst flx-is-capital (char)
-  "returns t if char is word"
+(defsubst flx-capital-p (char)
+  "Check if CHAR is an uppercase character."
   (and char
        (and (<= char ?Z)
             (<= ?A char))))
 
-(defsubst flx-is-boundary (last-char char)
+(defsubst flx-boundary-p (last-char char)
+  "Check is LAST-CHAR is the end of a word and CHAR the start of the next.
+
+The function is camel-case aware."
   (or (null last-char)
-      (and (not (flx-is-capital last-char))
-           (flx-is-capital char))
-      (and (not (flx-is-word last-char))
-           (flx-is-word char))))
+      (and (not (flx-capital-p last-char))
+           (flx-capital-p char))
+      (and (not (flx-word-p last-char))
+           (flx-word-p char))))
 
 (defsubst flx-inc-vec (vec &optional inc beg end)
   "increment each element of vectory by INC(default=1)
@@ -127,10 +130,10 @@ See documentation for logic."
                       ;; considered words of length 1.  This is so "foo/__ab"
                       ;; gets penalized compared to "foo/ab".
                       (if (zerop group-word-count) nil last-char)))
-                 (when (flx-is-boundary effective-last-char char)
+                 (when (flx-boundary-p effective-last-char char)
                    (setcdr (cdar groups-alist) (cons index (cddar groups-alist))))
-                 (when (and (not (flx-is-word last-char))
-                            (flx-is-word char))
+                 (when (and (not (flx-word-p last-char))
+                            (flx-word-p char))
                    (incf group-word-count)))
                ;; ++++ -45 penalize extension
                (when (eq last-char penalty-lead)
