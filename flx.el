@@ -78,8 +78,8 @@
 (defsubst flx-capital-p (char)
   "Check if CHAR is an uppercase character."
   (and char
-       (and (<= char ?Z)
-            (<= ?A char))))
+       (flx-word-p char)
+       (= char (upcase char))))
 
 (defsubst flx-boundary-p (last-char char)
   "Check is LAST-CHAR is the end of a word and CHAR the start of the next.
