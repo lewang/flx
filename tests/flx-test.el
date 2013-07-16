@@ -60,8 +60,10 @@
 (ert-deftest flx-capital-p ()
   (should (flx-capital-p ?A))
   (should (flx-capital-p ?Z))
+  (should (flx-capital-p ?Д))
   (should-not (flx-capital-p ?_))
-  (should-not (flx-capital-p ?a)))
+  (should-not (flx-capital-p ?a))
+  (should-not (flx-capital-p ?д)))
 
 (ert-deftest flx-word-p ()
   (should (flx-word-p ?a))
