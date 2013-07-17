@@ -27,6 +27,11 @@ you can install `flx` from the
 [MELPA](http://melpa.milkbox.net) repository. The version of
 `flx` there will always be up-to-date.
 
+### Marmalade
+
+`flx` is also available on the [Marmalade](http://marmalade-repo.org/)
+`package.el` repository.
+
 ### Emacs Prelude
 
 `flx` is part of the
