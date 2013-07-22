@@ -20,23 +20,32 @@ example using the folder `~/.emacs.d/vendor`:
 (add-to-list 'load-path "~/emacs.d/vendor")
 ```
 
-### MELPA
+### Package Repositories
 
-If you're an Emacs 24 user or you have a recent version of `package.el`
-you can install `flx` from the
-[MELPA](http://melpa.milkbox.net) repository. The version of
-`flx` there will always be up-to-date.
+Available packages:
 
-### Marmalade
+- `flx` - matching engine
+- `flx-ido` - ido interface for flx
 
-`flx` is also available on the [Marmalade](http://marmalade-repo.org/)
-`package.el` repository.
+Install `flx-ido` will pull in `flx` as a dependency.
+
+
+#### [MELPA](http://melpa.milkbox.net)
+
+If you're an Emacs 24 user or you have a recent version of `package.el` you
+can install `flx-ido` from MELPA.
+
+This version will always be up-to-date.
+
+#### [Marmalade](http://marmalade-repo.org/)
+
+`flx-ido` is also available on the Marmalade `package.el` repository.
 
 ### Emacs Prelude
 
-`flx` is part of the
+`flx-ido` is part of the
 [Emacs Prelude](https://github.com/bbatsov/prelude). If you're a Prelude
-user - `flx` is already properly configured and ready for
+user - `flx-ido` is already properly configured and ready for
 action.
 
 ## ido support
