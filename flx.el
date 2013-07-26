@@ -55,6 +55,9 @@
   "Face used by flx for highlighting flx match characters."
   :group 'flx)
 
+(defface flx-dir-face '((t (:inherit font-lock-preprocessor-face)))
+  "Face used by flx for highlighting directory candidates."
+  :group 'flx)
 
 (defun flx-get-hash-for-string (str heatmap-func)
   "Return hash-table for string where keys are characters value
@@ -316,15 +319,17 @@ SCORE of nil means to clear the properties."
                  (substring-no-properties (car obj))
                (substring-no-properties obj))))
 
+    (if (stringp (file-name-directory str))
+        (set-text-properties 0 (length str) '(face flx-dir-face) str))
     (unless (null score)
       (loop for char in (cdr score)
             do (progn
                  (when (and last-char
                             (not (= (1+ last-char) char)))
-                   (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+                   (set-text-properties block-started  (1+ last-char) '(face flx-highlight-face) str)
                    (setq block-started char))
                  (setq last-char char)))
-      (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+      (set-text-properties block-started  (1+ last-char) '(face flx-highlight-face) str)
       (when add-score
         (setq str (format "%s [%s]" str (car score)))))
     (if (consp obj)
