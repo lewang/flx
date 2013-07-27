@@ -48,6 +48,33 @@ This version will always be up-to-date.
 user - `flx-ido` is already properly configured and ready for
 action.
 
+## Usage
+
+The sorting algorithm is a balance between word beginnings (abbreviation) and
+contiguous matches (substring).
+
+The longer the substring match, the higher it scores.  This maps well to how
+we think about matching.
+
+In general, it's better form queries wiht only **alphanumeric** characters so
+the sorting algorithm can do something smart.
+
+For example, if you have these files:
+
+    projects/clojure-mode/clojure-mode.el
+    projects/prelude/core/prelude-mode.el
+
+If the search term was "pre-mode", you might expect "prelude-mode.el" to be
+ranked higher.  However because the substring match "re-mode" is so long,
+"clojure-mode.el" actually scores higher.
+
+
+Here, using "premode" would give the expected order
+
+### completing file names
+
+Matches within the basepath score higher.
+
 ## ido support
 
 Add this to your init file and *flx* match will be enabled for ido.
