@@ -2,7 +2,16 @@ EMACS=emacs
 EMACS23=emacs23
 EMACS-OPTIONS=
 
-.PHONY: test test-nw travis-ci show-version before-test
+ELS  = flx.el
+ELS += flx-ido.el
+ELCS = $(ELS:.el=.elc)
+
+.PHONY: test test-nw travis-ci show-version before-test clean
+
+all: $(ELCS)
+
+clean:
+	$(RM) $(ELCS)
 
 show-version: show-version
 	echo "*** Emacs version ***"
@@ -24,3 +33,6 @@ test-nw: before-test
 travis-ci: before-test
 	echo ${EMACS-OPTIONS}
 	${EMACS} -batch -Q -l tests/run-test.el
+
+%.elc: %.el
+	${EMACS} -batch -Q -L . -f batch-byte-compile $<
