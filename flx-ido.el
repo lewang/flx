@@ -197,7 +197,7 @@ item, in which case, the ending items are deleted."
     (clrhash flx-ido-narrowed-matches-hash)))
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
-  "Choose between the regular ido-set-matches-1 and my-ido-fuzzy-match"
+  "Choose between the regular ido-set-matches-1 and flx-ido-match"
   (if flx-ido-mode
       (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0)))
     ad-do-it))
