@@ -8,7 +8,7 @@
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
 ;; Version: 0.2
 ;; URL: https://github.com/lewang/flx
-;; Package-Requires: ((flx "0.1"))
+;; Package-Requires: ((flx "0.1") (cl-lib "0.3"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -54,7 +54,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'ido)
 (require 'flx)
 
@@ -97,7 +96,7 @@ item, in which case, the ending items are deleted."
           best-match
           exact
           res)
-      (loop for key being the hash-key of flx-ido-narrowed-matches-hash
+      (cl-loop for key being the hash-key of flx-ido-narrowed-matches-hash
             do (when (and (>= (length query-key) (length key))
                           (eq t
                               (compare-strings query-key 0 (min (length query-key)
@@ -109,7 +108,7 @@ item, in which case, the ending items are deleted."
                  (when (= (length key)
                           (length query-key))
                    (setq exact t)
-                   (return))))
+                   (cl-return))))
       (setq res (cond (exact
                        (gethash best-match flx-ido-narrowed-matches-hash))
                       (best-match
@@ -127,7 +126,7 @@ item, in which case, the ending items are deleted."
       (let ((decorate-count (min ido-max-prospects
                                  (length things))))
         (nconc
-         (loop for thing in things
+         (cl-loop for thing in things
                for i from 0 below decorate-count
                collect (if clear
                            (flx-propertize thing nil)
@@ -141,7 +140,7 @@ item, in which case, the ending items are deleted."
 
 (defun flx-ido-match-internal (query items)
   (if (< (length items) flx-ido-threshhold)
-      (let* ((matches (loop for item in items
+      (let* ((matches (cl-loop for item in items
                             for string = (if (consp item) (car item) item)
                             for score = (flx-score string query flx-file-cache)
                             if score
@@ -152,7 +151,7 @@ item, in which case, the ending items are deleted."
                            (sort matches
                                  (lambda (x y) (> (cadr x) (cadr y)))))))
     (let ((regexp (mapconcat 'identity (split-string query "" t) ".*")))
-      (loop for item in items
+      (cl-loop for item in items
             if (string-match regexp (if (consp item) (car item) item))
             collect item
             into matches
@@ -168,7 +167,7 @@ item, in which case, the ending items are deleted."
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
-  (destructuring-bind (exact res-items)
+  (cl-destructuring-bind (exact res-items)
       (flx-ido-narrowed query items)
     (flx-ido-cache query (if exact
                              res-items
