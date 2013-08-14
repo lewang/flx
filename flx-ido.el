@@ -150,12 +150,7 @@ item, in which case, the ending items are deleted."
         (flx-ido-decorate (ido-delete-runs
                            (sort matches
                                  (lambda (x y) (> (cadr x) (cadr y)))))))
-    (let ((regexp (mapconcat 'identity (split-string query "" t) ".*")))
-      (cl-loop for item in items
-            if (string-match regexp (if (consp item) (car item) item))
-            collect item
-            into matches
-            finally return matches))))
+    (throw :too-big :too-big)))
 
 (defun flx-ido-key-for-query (query)
   (concat ido-current-directory query))
@@ -197,8 +192,10 @@ item, in which case, the ending items are deleted."
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and flx-ido-match"
-  (if flx-ido-mode
-      (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0)))
+  (when (or (not flx-ido-mode)
+            (eq :too-big
+                (catch :too-big
+                  (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0))))))
     ad-do-it))
 
 ;;;###autoload
