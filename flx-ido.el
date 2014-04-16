@@ -205,6 +205,13 @@ item, in which case, the ending items are deleted."
                   (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0))))))
     ad-do-it))
 
+(defadvice ido-kill-buffer-at-head (before flx-ido-reset-hash activate)
+  "Keep up with modification as required."
+  (when flx-ido-mode
+    ;; if not at EOB, query text is deleted.
+    (when (eobp)
+      (clrhash flx-ido-narrowed-matches-hash))))
+
 ;;;###autoload
 (define-minor-mode flx-ido-mode
   "Toggle flx ido mode"
