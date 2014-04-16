@@ -91,6 +91,12 @@ item, in which case, the ending items are deleted."
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal)
   "Key is a query string.  Value is a list of narrowed matches.")
 
+(defun flx-ido-is-prefix-match (a b)
+  (let ((min-len (min (length a)
+                      (length b))))
+    (eq t (compare-strings b 0 min-len
+                           a 0 min-len))))
+
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
@@ -102,10 +108,7 @@ item, in which case, the ending items are deleted."
           res)
       (cl-loop for key being the hash-key of flx-ido-narrowed-matches-hash
             do (when (and (>= (length query-key) (length key))
-                          (eq t
-                              (compare-strings query-key 0 (min (length query-key)
-                                                                (length key))
-                                               key 0 nil))
+                          (flx-ido-is-prefix-match query-key key)
                           (or (null best-match)
                               (> (length key) (length best-match))))
                  (setq best-match key)
