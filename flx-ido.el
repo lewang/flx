@@ -88,7 +88,8 @@ item, in which case, the ending items are deleted."
         (setcdr before-last-run nil)))
     list))
 
-(defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal))
+(defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal)
+  "Key is a query string.  Value is a list of narrowed matches.")
 
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
