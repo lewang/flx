@@ -6,7 +6,7 @@
 ;; Maintainer: Le Wang
 ;; Description: fuzzy matching with good sorting
 ;; Created: Wed Apr 17 01:01:41 2013 (+0800)
-;; Version: 0.1
+;; Version: 0.3
 ;; Package-Requires: ((cl-lib "0.3"))
 ;; URL: https://github.com/lewang/flx
 
@@ -62,11 +62,17 @@
   is a sorted list of indexes for character occurrences."
   (let* ((res (make-hash-table :test 'eq :size 32))
          (str-len (length str))
-         char)
+         down-char)
     (cl-loop for index from (1- str-len) downto 0
+             for char = (aref str index)
           do (progn
-               (setq char (downcase (aref str index)))
-               (push index (gethash char res))))
+               ;; simulate `case-fold-search'
+               (if (flx-capital-p char)
+                   (progn
+                     (push index (gethash char res))
+                     (setq down-char (downcase char)))
+                 (setq down-char char))
+               (push index (gethash down-char res))))
     (puthash 'heatmap (funcall heatmap-func str) res)
     res))
 
@@ -271,7 +277,6 @@ e.g. (\"aab\" \"ab\") returns
 
 (defun flx-score (str query &optional cache)
   "return best score matching QUERY against STR"
-  (setq query (downcase query))
   (unless (or (zerop (length query))
               (zerop (length str)))
     (let* ((info-hash (flx-process-cache str cache))
