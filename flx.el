@@ -339,12 +339,17 @@ SCORE of nil means to clear the properties."
 
 
 
-(defvar flx-file-cache (flx-make-filename-cache)
+(defvar flx-file-cache nil
   "Cached heatmap info about strings.")
 
-(defvar flx-strings-cache (flx-make-string-cache)
+;;; reset value on every file load.
+(setq flx-file-cache (flx-make-filename-cache))
+
+(defvar flx-strings-cache nil
   "Cached heatmap info about filenames.")
 
+;;; reset value on every file load.
+(setq flx-strings-cache (flx-make-string-cache))
 
 
 (provide 'flx)
