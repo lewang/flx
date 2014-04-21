@@ -71,6 +71,12 @@ higher.  However because the substring match "re-mode" is so long,
 **Here, using *premode* would give the expected order.** Notice that the
 "-" actually prevents the algorithm from helping you.
 
+### uppercase letters
+
+Flx always folds lowercase letters to match uppercase.  However, you can use upper case letters for force flx to only match uppercase.
+
+This is similar to Emacs' case-folding.  The difference is mixing in uppercase letters **does not disable** folding.
+
 ### completing file names
 
 Matches within the basepath score higher.
