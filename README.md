@@ -56,20 +56,20 @@ contiguous matches (substring).
 The longer the substring match, the higher it scores.  This maps well to how
 we think about matching.
 
-In general, it's better form queries wiht only **alphanumeric** characters so
+In general, it's better form queries with only lowercase characters so
 the sorting algorithm can do something smart.
 
 For example, if you have these files:
 
-    projects/clojure-mode/clojure-mode.el
-    projects/prelude/core/prelude-mode.el
+        projects/clojure-mode/clojure-mode.el
+        projects/prelude/core/prelude-mode.el
 
-If the search term was "pre-mode", you might expect "prelude-mode.el" to be
-ranked higher.  However because the substring match "re-mode" is so long,
+If the search term was *pre-mode*, you might expect "prelude-mode.el" to rank
+higher.  However because the substring match "re-mode" is so long,
 "clojure-mode.el" actually scores higher.
 
-
-Here, using "premode" would give the expected order
+**Here, using *premode* would give the expected order.** Notice that the
+"-" actually prevents the algorithm from helping you.
 
 ### completing file names
 
