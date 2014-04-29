@@ -91,10 +91,11 @@ Add this to your init file and *flx* match will be enabled for ido.
 (ido-everywhere 1)
 (flx-ido-mode 1)
 ;; disable ido faces to see flx highlights.
+(setq ido-enable-flex-matching t)
 (setq ido-use-faces nil)
 ```
 
-If don't want to use the `flx`'s highlights you can turn them off like this:
+If you don't want to use the `flx`'s highlights you can turn them off like this:
 
 ```lisp
 (setq flx-ido-use-faces nil)
