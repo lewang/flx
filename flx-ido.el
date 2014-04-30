@@ -97,6 +97,12 @@ item, in which case, the ending items are deleted."
                       (length b))))
     (eq t (compare-strings b 0 min-len
                            a 0 min-len))))
+(defun flx-ido-is-prefix-match (str prefix)
+  "Return t if PREFIX is PREFIX of STR"
+  (when (and str prefix)
+    (let ((length (length prefix)))
+      (eq t (compare-strings prefix 0 length
+                             str 0 length)))))
 
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
@@ -108,15 +114,15 @@ item, in which case, the ending items are deleted."
           exact
           res)
       (cl-loop for key being the hash-key of flx-ido-narrowed-matches-hash
-            do (when (and (>= (length query-key) (length key))
-                          (flx-ido-is-prefix-match query-key key)
-                          (or (null best-match)
-                              (> (length key) (length best-match))))
-                 (setq best-match key)
-                 (when (= (length key)
-                          (length query-key))
-                   (setq exact t)
-                   (cl-return))))
+               do (when (and (>= (length query-key) (length key))
+                             (flx-ido-is-prefix-match query-key key)
+                             (or (null best-match)
+                                 (> (length key) (length best-match))))
+                    (setq best-match key)
+                    (when (= (length key)
+                             (length query-key))
+                      (setq exact t)
+                      (cl-return))))
       (setq res (cond (exact
                        (gethash best-match flx-ido-narrowed-matches-hash))
                       (best-match
