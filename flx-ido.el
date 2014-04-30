@@ -70,24 +70,22 @@
   "Use `flx-highlight-face' to indicate characters contributing to best score."
   :group 'ido)
 
-(unless (fboundp 'ido-delete-runs)
-  (defun ido-delete-runs (list)
-    "Delete consecutive runs of same item in list.
-Comparison done with `equal'.  Runs may loop back on to the first
-item, in which case, the ending items are deleted."
-    (let ((tail list)
-          before-last-run)
-      (while tail
-        (if (consp (cdr tail))
-            (if (equal (car tail) (cadr tail))
-                (setcdr tail (cddr tail))
-              (setq before-last-run tail)
-              (setq tail (cdr tail)))
-          (setq tail (cdr tail))))
-      (when (and before-last-run
-                 (equal (car list) (cadr before-last-run)))
-        (setcdr before-last-run nil)))
-    list))
+(unless (fboundp 'delete-consecutive-dups)
+  (defun delete-consecutive-dups (list &optional circular)
+    "Destructively remove `equal' consecutive duplicates from LIST.
+First and last elements are considered consecutive if CIRCULAR is
+non-nil."
+    (let ((tail list) last)
+      (while (consp tail)
+        (if (equal (car tail) (cadr tail))
+            (setcdr tail (cddr tail))
+          (setq last (car tail)
+                tail (cdr tail))))
+      (if (and circular
+               (cdr list)
+               (equal last (car list)))
+          (nbutlast list)
+        list))))
 
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal)
   "Key is a query string.  Value is a list of narrowed matches.")
@@ -165,9 +163,10 @@ item, in which case, the ending items are deleted."
                            collect (cons item score)
                            into matches
                            finally return matches)))
-    (flx-ido-decorate (ido-delete-runs
+    (flx-ido-decorate (delete-consecutive-dups
                        (sort matches
-                             (lambda (x y) (> (cadr x) (cadr y))))))))
+                             (lambda (x y) (> (cadr x) (cadr y))))
+                       t))))
 
 (defun flx-ido-key-for-query (query)
   (concat ido-current-directory query))
