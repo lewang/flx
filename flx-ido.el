@@ -97,6 +97,12 @@ item, in which case, the ending items are deleted."
                       (length b))))
     (eq t (compare-strings b 0 min-len
                            a 0 min-len))))
+(defvar flx-ido-debug nil)
+
+(defun flx-ido-debug (&rest args)
+  (when flx-ido-debug
+      (apply 'message args)))
+
 (defun flx-ido-is-prefix-match (str prefix)
   "Return t if PREFIX is PREFIX of STR"
   (when (and str prefix)
@@ -107,6 +113,7 @@ item, in which case, the ending items are deleted."
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
   longest prefix match."
+  (flx-ido-debug "flx-ido-narrowed saw %s items" (length items))
   (if (zerop (length query))
       (list t (nreverse items))
     (let ((query-key (flx-ido-key-for-query query))
@@ -178,6 +185,7 @@ item, in which case, the ending items are deleted."
   "Better sorting for flx ido matching."
   (cl-destructuring-bind (exact res-items)
       (flx-ido-narrowed query items)
+    (flx-ido-debug "exact: %s\nbefore hash coung %s " exact (hash-table-count flx-ido-narrowed-matches-hash))
     (flx-ido-cache query (if exact
                              res-items
                            (flx-ido-match-internal query res-items)))))
