@@ -103,10 +103,10 @@ If you don't want to use the `flx`'s highlights you can turn them off like this:
 
 ### Flx uses a complex matching heuristics which can be slow for large collections
 
-Customize `flx-ido-threshhold` to change the collection size above which flx
+Customize `flx-ido-threshold` to change the collection size above which flx
 will revert to flex matching.
 
-As soon as the collection is narrowed below `flx-ido-threshhold`, flx will
+As soon as the collection is narrowed below `flx-ido-threshold`, flx will
 kick in again.
 
 As a point of reference for a 2.3 GHz quad-core i7 processor, a value of

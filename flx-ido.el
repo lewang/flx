@@ -61,7 +61,7 @@
 (eval-when-compile
   (defvar ido-cur-item))
 
-(defcustom flx-ido-threshhold 6000
+(defcustom flx-ido-threshold 6000
   "flx will not kick in until collection is filtered below this size with \"flex\"."
   :group 'ido)
 
@@ -224,7 +224,7 @@ non-nil."
     (setq flx-ido-last-run (cons
                             query
                             (if (or (not flx-ido-mode)
-                                    (> (length items) flx-ido-threshhold))
+                                    (> (length items) flx-ido-threshold))
                                 ad-do-it
                               (flx-ido-match query items)))))
   (setq ad-return-value (cdr flx-ido-last-run))
