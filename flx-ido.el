@@ -92,11 +92,6 @@ item, in which case, the ending items are deleted."
 (defvar flx-ido-narrowed-matches-hash (make-hash-table :test 'equal)
   "Key is a query string.  Value is a list of narrowed matches.")
 
-(defun flx-ido-is-prefix-match (a b)
-  (let ((min-len (min (length a)
-                      (length b))))
-    (eq t (compare-strings b 0 min-len
-                           a 0 min-len))))
 (defvar flx-ido-debug nil)
 
 (defun flx-ido-debug (&rest args)
@@ -109,6 +104,8 @@ item, in which case, the ending items are deleted."
     (let ((length (length prefix)))
       (eq t (compare-strings prefix 0 length
                              str 0 length)))))
+
+(defvar flx-ido-last-run nil)
 
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
@@ -160,18 +157,17 @@ item, in which case, the ending items are deleted."
       (mapcar 'car things))))
 
 (defun flx-ido-match-internal (query items)
-  (if (< (length items) flx-ido-threshhold)
-      (let* ((matches (cl-loop for item in items
-                            for string = (if (consp item) (car item) item)
-                            for score = (flx-score string query flx-file-cache)
-                            if score
-                            collect (cons item score)
-                            into matches
-                            finally return matches)))
-        (flx-ido-decorate (ido-delete-runs
-                           (sort matches
-                                 (lambda (x y) (> (cadr x) (cadr y)))))))
-    (throw :too-big :too-big)))
+  (flx-ido-debug "flx-ido-match-internal saw %s items" (length items))
+  (let* ((matches (cl-loop for item in items
+                           for string = (if (consp item) (car item) item)
+                           for score = (flx-score string query flx-file-cache)
+                           if score
+                           collect (cons item score)
+                           into matches
+                           finally return matches)))
+    (flx-ido-decorate (ido-delete-runs
+                       (sort matches
+                             (lambda (x y) (> (cadr x) (cadr y))))))))
 
 (defun flx-ido-key-for-query (query)
   (concat ido-current-directory query))
@@ -180,6 +176,11 @@ item, in which case, the ending items are deleted."
   (if (memq ido-cur-item '(file dir))
       items
     (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash)))
+
+(defun flx-ido-reset ()
+  "Clean up flx variables between ido sessions."
+  (clrhash flx-ido-narrowed-matches-hash)
+  (setq flx-ido-last-run nil))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
@@ -190,7 +191,7 @@ item, in which case, the ending items are deleted."
                              res-items
                            (flx-ido-match-internal query res-items)))))
 
-(defadvice ido-exit-minibuffer (around flx-ido-undecorate activate)
+(defadvice ido-exit-minibuffer (around flx-ido-reset activate)
   "Remove flx properties after."
   (let* ((obj (car ido-matches))
          (str (if (consp obj)
@@ -198,34 +199,46 @@ item, in which case, the ending items are deleted."
                 obj)))
     (when (and flx-ido-mode str)
       (remove-text-properties 0 (length str)
-                              '(face flx-highlight-face) str)))
+                              '(face flx-highlight-face) str))
+    (flx-ido-reset))
 
   ad-do-it)
 
-(defadvice ido-read-internal (before flx-ido-reset-hash activate)
+(defadvice ido-read-internal (before flx-ido-reset activate)
   "Clear flx narrowed hash beforehand."
   (when flx-ido-mode
-    (clrhash flx-ido-narrowed-matches-hash)))
+    (flx-ido-reset)))
 
-(defadvice ido-restrict-to-matches (before flx-ido-reset-hash activate)
+(defadvice ido-restrict-to-matches (before flx-ido-reset activate)
   "Clear flx narrowed hash."
   (when flx-ido-mode
-    (clrhash flx-ido-narrowed-matches-hash)))
+    (flx-ido-reset)))
 
 (defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
   "Choose between the regular ido-set-matches-1 and flx-ido-match"
-  (when (or (not flx-ido-mode)
-            (eq :too-big
-                (catch :too-big
-                  (setq ad-return-value (flx-ido-match ido-text (ad-get-arg 0))))))
-    ad-do-it))
+  (flx-ido-debug "id-set-matches-1 sees %s items" (length (ad-get-arg 0)))
+  (let* ((query ido-text)
+         (items (or (and
+                     (flx-ido-is-prefix-match query (car flx-ido-last-run))
+                     (cdr-safe flx-ido-last-run))
+                    (ad-get-arg 0))))
+    (setq flx-ido-last-run (cons
+                            query
+                            (if (or (not flx-ido-mode)
+                                    (> (length items) flx-ido-threshhold))
+                                ad-do-it
+                              (flx-ido-match query items)))))
+  (setq ad-return-value (cdr flx-ido-last-run))
+  (flx-ido-debug "id-set-matches-1 returning %s " ad-return-value))
 
-(defadvice ido-kill-buffer-at-head (before flx-ido-reset-hash activate)
+(defadvice ido-kill-buffer-at-head (before flx-ido-reset activate)
   "Keep up with modification as required."
   (when flx-ido-mode
     ;; if not at EOB, query text is deleted.
     (when (eobp)
-      (clrhash flx-ido-narrowed-matches-hash))))
+      (flx-ido-reset))))
+
+(add-hook 'ido-minibuffer-setup-hook 'flx-ido-reset nil)
 
 ;;;###autoload
 (define-minor-mode flx-ido-mode
