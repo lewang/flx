@@ -213,22 +213,37 @@ non-nil."
   (when flx-ido-mode
     (flx-ido-reset)))
 
-(defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate)
+(defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate compile)
   "Choose between the regular ido-set-matches-1 and flx-ido-match"
-  (flx-ido-debug "id-set-matches-1 sees %s items" (length (ad-get-arg 0)))
-  (let* ((query ido-text)
-         (items (or (and
-                     (flx-ido-is-prefix-match query (car flx-ido-last-run))
-                     (cdr-safe flx-ido-last-run))
-                    (ad-get-arg 0))))
-    (setq flx-ido-last-run (cons
-                            query
-                            (if (or (not flx-ido-mode)
-                                    (> (length items) flx-ido-threshold))
-                                ad-do-it
-                              (flx-ido-match query items)))))
-  (setq ad-return-value (cdr flx-ido-last-run))
-  (flx-ido-debug "id-set-matches-1 returning %s " ad-return-value))
+  (if (not flx-ido-mode)
+      ad-do-it
+    (let* ((query ido-text)
+           (original-items (ad-get-arg 0))
+           (foo (ad-get-arg 0))
+           filtered-items
+           items)
+      (setq test (ad-get-arg 0))
+      (message "original-items: %s" original-items)
+      (message "test: %s" test)
+      (flx-ido-debug "id-set-matches-1 sees %s items" (length original-items))
+      (setq items (cond ((flx-ido-is-prefix-match query (car flx-ido-last-run))
+                         (cdr flx-ido-last-run))
+                        ((< (length original-items) flx-ido-threshold)
+                         original-items)
+                        (t
+                         ;; Why??? does not work if I don't set it here.
+                         (ad-set-arg 0 original-items)
+                         (setq filtered-items ad-do-it)
+                         (if (< (length filtered-items) flx-ido-threshold)
+                             filtered-items
+                           :too-big))))
+      (if (eq items :too-big)
+          (progn
+            (flx-ido-reset)
+            (setq ad-return-value filtered-items))
+        (setq ad-return-value (flx-ido-match query items))
+        (setq flx-ido-last-run (cons query ad-return-value))))
+    (flx-ido-debug "id-set-matches-1 returning %s " ad-return-value)))
 
 (defadvice ido-kill-buffer-at-head (before flx-ido-reset activate)
   "Keep up with modification as required."
