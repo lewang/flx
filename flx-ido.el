@@ -36,7 +36,8 @@
 
 ;;; Acknowledgments
 
-;; Scott Frazer's blog entry http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
+;; Scott Frazer's blog entry
+;; http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
 ;; provided a lot of inspiration.
 ;;
 ;; ido-hacks was helpful for ido optimization and fontification ideas
@@ -219,26 +220,24 @@ non-nil."
       ad-do-it
     (let* ((query ido-text)
            (original-items (ad-get-arg 0))
-           (foo (ad-get-arg 0))
-           filtered-items
-           items)
+           ad-filtered-items
+           ad-items)
       (flx-ido-debug "id-set-matches-1 sees %s items" (length original-items))
-      (setq items (cond ((flx-ido-is-prefix-match query (car flx-ido-last-run))
-                         (cdr flx-ido-last-run))
-                        ((< (length original-items) flx-ido-threshold)
-                         original-items)
-                        (t
-                         ;; Why??? does not work if I don't set it here.
-                         (ad-set-arg 0 original-items)
-                         (setq filtered-items ad-do-it)
-                         (if (< (length filtered-items) flx-ido-threshold)
-                             filtered-items
-                           :too-big))))
-      (if (eq items :too-big)
+      (setq ad-items (cond ((flx-ido-is-prefix-match query (car flx-ido-last-run))
+                            (cdr flx-ido-last-run))
+                           ((< (length original-items) flx-ido-threshold)
+                            original-items)
+                           (t
+                            ;; filter using flex, then apply flx if list is short enough.
+                            (setq ad-filtered-items ad-do-it)
+                            (if (< (length ad-filtered-items) flx-ido-threshold)
+                                ad-filtered-items
+                              :too-big))))
+      (if (eq ad-items :too-big)
           (progn
             (flx-ido-reset)
-            (setq ad-return-value filtered-items))
-        (setq ad-return-value (flx-ido-match query items))
+            (setq ad-return-value ad-filtered-items))
+        (setq ad-return-value (flx-ido-match query ad-items))
         (setq flx-ido-last-run (cons query ad-return-value))))
     (flx-ido-debug "id-set-matches-1 returning %s " ad-return-value)))
 
