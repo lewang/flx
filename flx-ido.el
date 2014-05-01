@@ -61,7 +61,7 @@
 (eval-when-compile
   (defvar ido-cur-item))
 
-(defcustom flx-ido-threshold 6000
+(defcustom flx-ido-threshold 500
   "flx will not kick in until collection is filtered below this size with \"flex\"."
   :group 'ido)
 
@@ -222,9 +222,6 @@ non-nil."
            (foo (ad-get-arg 0))
            filtered-items
            items)
-      (setq test (ad-get-arg 0))
-      (message "original-items: %s" original-items)
-      (message "test: %s" test)
       (flx-ido-debug "id-set-matches-1 sees %s items" (length original-items))
       (setq items (cond ((flx-ido-is-prefix-match query (car flx-ido-last-run))
                          (cdr flx-ido-last-run))
