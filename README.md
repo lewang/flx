@@ -2,8 +2,9 @@
 
 ## Status
 
-This project is in its infancy yet.  It's unlikely to crash your Emacs, but do
-expect to encounter bugs.
+This project is more than a year old now.  Lots of bugs have been worked out.
+
+It appears some people use it on a regular basis.
 
 ## Screencast
 
