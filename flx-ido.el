@@ -63,7 +63,10 @@
   (defvar ido-cur-item))
 
 (defcustom flx-ido-threshold 500
-  "flx will not kick in until collection is filtered below this size with \"flex\"."
+  "Threshold for activating flx algorithm.
+
+Flx will not kick in until collection is filtered below this
+size with idos' default \"flex\" algorithm."
   :group 'ido)
 
 
@@ -94,11 +97,13 @@ non-nil."
 (defvar flx-ido-debug nil)
 
 (defun flx-ido-debug (&rest args)
+  "Debugging util function.
+ARGS passed to message."
   (when flx-ido-debug
       (apply 'message args)))
 
 (defun flx-ido-is-prefix-match (str prefix)
-  "Return t if PREFIX is PREFIX of STR"
+  "Return t if STR starts with PREFIX."
   (when (and str prefix)
     (let ((length (length prefix)))
       (eq t (compare-strings prefix 0 length
@@ -108,7 +113,7 @@ non-nil."
 
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
-  longest prefix match."
+longest prefix match."
   (flx-ido-debug "flx-ido-narrowed saw %s items" (length items))
   (if (zerop (length query))
       (list t (nreverse items))
@@ -135,10 +140,13 @@ non-nil."
       (list exact res))))
 
 (defun flx-ido-undecorate (strings)
+  "Remove decorations from STRINGS."
   (flx-ido-decorate strings t))
 
 
 (defun flx-ido-decorate (things &optional clear)
+  "Add ido text properties to THINGS.
+If CLEAR is specified, clear them instead."
   (if flx-ido-use-faces
       (let ((decorate-count (min ido-max-prospects
                                  (length things))))
@@ -156,6 +164,7 @@ non-nil."
       (mapcar 'car things))))
 
 (defun flx-ido-match-internal (query items)
+  "Match QUERY against ITEMS using flx scores."
   (flx-ido-debug "flx-ido-match-internal saw %s items" (length items))
   (let* ((matches (cl-loop for item in items
                            for string = (if (consp item) (car item) item)
@@ -170,9 +179,11 @@ non-nil."
                        t))))
 
 (defun flx-ido-key-for-query (query)
+  "Canonicalize QUERY to form key."
   (concat ido-current-directory query))
 
 (defun flx-ido-cache (query items)
+  "Possibly insert items into cache."
   (if (memq ido-cur-item '(file dir))
       items
     (puthash (flx-ido-key-for-query query) items flx-ido-narrowed-matches-hash)))
