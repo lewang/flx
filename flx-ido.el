@@ -109,8 +109,6 @@ ARGS passed to message."
       (eq t (compare-strings prefix 0 length
                              str 0 length)))))
 
-(defvar flx-ido-last-run nil)
-
 (defun flx-ido-narrowed (query items)
   "Get the value from `flx-ido-narrowed-matches-hash' with the
 longest prefix match."
@@ -164,19 +162,25 @@ If CLEAR is specified, clear them instead."
       (mapcar 'car things))))
 
 (defun flx-ido-match-internal (query items)
-  "Match QUERY against ITEMS using flx scores."
+  "Match QUERY against ITEMS using flx scores.
+
+If filtered item count is still greater than `flx-ido-threshold', then use flex."
   (flx-ido-debug "flx-ido-match-internal saw %s items" (length items))
-  (let* ((matches (cl-loop for item in items
-                           for string = (ido-name item)
-                           for score = (flx-score string query flx-file-cache)
-                           if score
-                           collect (cons item score)
-                           into matches
-                           finally return matches)))
-    (flx-ido-decorate (delete-consecutive-dups
-                       (sort matches
-                             (lambda (x y) (> (cadr x) (cadr y))))
-                       t))))
+  (let ((flex-result (flx-flex-match query items)))
+    (flx-ido-debug "flex result count: %s" (length flex-result))
+    (if (< (length flex-result) flx-ido-threshold)
+        (let* ((matches (cl-loop for item in flex-result
+                                 for string = (ido-name item)
+                                 for score = (flx-score string query flx-file-cache)
+                                 if score
+                                 collect (cons item score)
+                                 into matches
+                                 finally return matches)))
+          (flx-ido-decorate (delete-consecutive-dups
+                             (sort matches
+                                   (lambda (x y) (> (cadr x) (cadr y))))
+                             t)))
+      flex-result)))
 
 (defun flx-ido-key-for-query (query)
   "Canonicalize QUERY to form key."
@@ -190,17 +194,35 @@ If CLEAR is specified, clear them instead."
 
 (defun flx-ido-reset ()
   "Clean up flx variables between ido sessions."
-  (clrhash flx-ido-narrowed-matches-hash)
-  (setq flx-ido-last-run nil))
+  (clrhash flx-ido-narrowed-matches-hash))
 
 (defun flx-ido-match (query items)
   "Better sorting for flx ido matching."
   (cl-destructuring-bind (exact res-items)
       (flx-ido-narrowed query items)
-    (flx-ido-debug "exact: %s\nbefore hash coung %s " exact (hash-table-count flx-ido-narrowed-matches-hash))
+    (flx-ido-debug "exact: %s\nbefore hash count %s " exact (hash-table-count flx-ido-narrowed-matches-hash))
     (flx-ido-cache query (if exact
                              res-items
                            (flx-ido-match-internal query res-items)))))
+
+(defun flx-flex-match (query items)
+  "Reimplement ido's flex matching.
+Our implementation always uses flex and doesn't care about substring matches."
+  (if (zerop (length query))
+      items
+    (let ((re (concat (regexp-quote (string (aref query 0)))
+                      (mapconcat (lambda (c)
+                                   (concat "[^" (string c) "]*"
+                                           (regexp-quote (string c))))
+                                 (substring query 1) "")))
+          matches)
+      (mapc
+       (lambda (item)
+         (let ((name (ido-name item)))
+           (if (string-match re name)
+               (setq matches (cons item matches)))))
+       items)
+      (delete-consecutive-dups matches t))))
 
 (defadvice ido-exit-minibuffer (around flx-ido-reset activate)
   "Remove flx properties after."
@@ -230,27 +252,11 @@ If CLEAR is specified, clear them instead."
   (if (not flx-ido-mode)
       ad-do-it
     (let* ((query ido-text)
-           (original-items (ad-get-arg 0))
-           ad-filtered-items
-           ad-items)
+           (original-items (ad-get-arg 0)))
+      (flx-ido-debug "query: %s" query)
       (flx-ido-debug "id-set-matches-1 sees %s items" (length original-items))
-      (setq ad-items (cond ((flx-ido-is-prefix-match query (car flx-ido-last-run))
-                            (cdr flx-ido-last-run))
-                           ((< (length original-items) flx-ido-threshold)
-                            original-items)
-                           (t
-                            ;; filter using flex, then apply flx if list is short enough.
-                            (setq ad-filtered-items ad-do-it)
-                            (if (< (length ad-filtered-items) flx-ido-threshold)
-                                ad-filtered-items
-                              :too-big))))
-      (if (eq ad-items :too-big)
-          (progn
-            (flx-ido-reset)
-            (setq ad-return-value ad-filtered-items))
-        (setq ad-return-value (flx-ido-match query ad-items))
-        (setq flx-ido-last-run (cons query ad-return-value))))
-    (flx-ido-debug "id-set-matches-1 returning %s " ad-return-value)))
+      (setq ad-return-value (flx-ido-match query original-items)))
+    (flx-ido-debug "id-set-matches-1 returning %s items starting with %s " (length ad-return-value) (car ad-return-value))))
 
 (defadvice ido-kill-buffer-at-head (before flx-ido-reset activate)
   "Keep up with modification as required."
