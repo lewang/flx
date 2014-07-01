@@ -167,7 +167,7 @@ If CLEAR is specified, clear them instead."
   "Match QUERY against ITEMS using flx scores."
   (flx-ido-debug "flx-ido-match-internal saw %s items" (length items))
   (let* ((matches (cl-loop for item in items
-                           for string = (if (consp item) (car item) item)
+                           for string = (ido-name item)
                            for score = (flx-score string query flx-file-cache)
                            if score
                            collect (cons item score)
