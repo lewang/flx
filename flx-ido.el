@@ -62,7 +62,7 @@
 (eval-when-compile
   (defvar ido-cur-item))
 
-(defcustom flx-ido-threshold 500
+(defcustom flx-ido-threshold 2000
   "Threshold for activating flx algorithm.
 
 Flx will not kick in until collection is filtered below this
