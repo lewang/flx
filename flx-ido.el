@@ -205,17 +205,26 @@ If filtered item count is still greater than `flx-ido-threshold', then use flex.
                              res-items
                            (flx-ido-match-internal query res-items)))))
 
+(defun flx-ido-query-to-regexp (query)
+  "Convert QUERY to flx style case folding regexp."
+  (let* ((breakdown-str (mapcar (lambda (c)
+                                  (apply 'string c (when (= (downcase c) c)
+                                                       (list (upcase c)))))
+                                query))
+         (re (concat (format "[%s]" (nth 0 breakdown-str))
+                     (mapconcat (lambda (c)
+                                  (format "[^%s]*[%s]" c c))
+                                (cdr breakdown-str) ""))))
+    re))
+
 (defun flx-flex-match (query items)
   "Reimplement ido's flex matching.
 Our implementation always uses flex and doesn't care about substring matches."
   (if (zerop (length query))
       items
-    (let ((re (concat (regexp-quote (string (aref query 0)))
-                      (mapconcat (lambda (c)
-                                   (concat "[^" (string c) "]*"
-                                           (regexp-quote (string c))))
-                                 (substring query 1) "")))
-          matches)
+    (let* ((case-fold-search nil)
+           (re (flx-ido-query-to-regexp query))
+           matches)
       (mapc
        (lambda (item)
          (let ((name (ido-name item)))
