@@ -26,8 +26,14 @@ The score info we add here is later removed with another filter."
                                 (setcdr candidate (cons (cdr candidate) score))
                                 candidate)))
       (setq res (sort res
-                      (lambda (a b)
-                        (> (caddr a) (caddr b)))))
+                      (lambda (x y)
+                        (let ((scorex (caddr x))
+                              (scorey (caddr y))
+                              (strx (car x))
+                              (stry (car y)))
+                          (if (= scorex scorey)
+                              (not (string< stry strx))
+                            (> scorex scorey))))))
       (loop for item in res
             for index from 0
             for score = (cddr item)
