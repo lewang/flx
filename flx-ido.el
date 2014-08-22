@@ -231,7 +231,7 @@ Our implementation always uses flex and doesn't care about substring matches."
            (if (string-match re name)
                (setq matches (cons item matches)))))
        items)
-      (delete-consecutive-dups matches t))))
+      (delete-consecutive-dups (nreverse matches) t))))
 
 (defadvice ido-exit-minibuffer (around flx-ido-reset activate)
   "Remove flx properties after."
