@@ -178,14 +178,7 @@ If filtered item count is still greater than `flx-ido-threshold', then use flex.
                                  finally return matches)))
           (flx-ido-decorate (delete-consecutive-dups
                              (sort matches
-                                   (lambda (x y)
-                                     (let ((scorex (cadr x))
-                                           (scorey (cadr y))
-                                           (strx (car x))
-                                           (stry (car y)))
-                                       (if (= scorex scorey)
-                                           (not (string< stry strx))
-                                         (> scorex scorey)))))
+                                   (lambda (x y) (> (cadr x) (cadr y))))
                              t)))
       flex-result)))
 
@@ -238,7 +231,7 @@ Our implementation always uses flex and doesn't care about substring matches."
            (if (string-match re name)
                (setq matches (cons item matches)))))
        items)
-      (delete-consecutive-dups matches t))))
+      (delete-consecutive-dups (nreverse matches) t))))
 
 (defadvice ido-exit-minibuffer (around flx-ido-reset activate)
   "Remove flx properties after."
