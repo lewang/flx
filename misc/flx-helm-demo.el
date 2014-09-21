@@ -39,7 +39,9 @@ The score info we add here is later removed with another filter."
       res)))
 
 (defun flx-helm-test-candidates ()
-  foo-list)
+  (list ".stumpwmrc" ".stump/"
+        "amusic" "texinfo-all-menus-update"
+        "*Group*" "*Customize Group: Flx*"))
 
 (setq flx-helm-candidate-list-test
       '((name . "flx candidate-list-test")
