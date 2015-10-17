@@ -179,7 +179,7 @@ See documentation for logic."
                                     (1- separator-count)
                                   0)
                                 ;; ++++ basepath word count penalty
-                                (- word-count))
+                                (- words-length))
                            ;; ++++ non-basepath penalties
                            (if (= index 0)
                                -3
