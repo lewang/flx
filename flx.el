@@ -220,34 +220,6 @@ See documentation for logic."
                  (cl-return sub)))
       sorted-list))
 
-(defun flx-get-matches (hash query &optional greater-than q-index)
-  "Return list of all unique indexes into str where query can match.
-
-That is all character sequences of query that occur in str are returned.
-
-HASH accept as the cached analysis of str.
-sstr
-e.g. (\"aab\" \"ab\") returns
-       '((0 2) (1 2)
-"
-
-  (setq q-index (or q-index 0))
-  (let* ((q-char (aref query q-index))
-         (indexes (flx-bigger-sublist
-                   (gethash q-char hash) greater-than)))
-    (if (< q-index (1- (length query)))
-        (apply                        ; `mapcan'
-         'nconc
-         (mapcar
-          (lambda (index)
-            (let ((next-matches-for-rest (flx-get-matches hash query  index (1+ q-index))))
-              (when next-matches-for-rest
-                (mapcar (lambda (match)
-                          (cons index match))
-                        next-matches-for-rest))))
-          indexes))
-      (mapcar 'list indexes))))
-
 (defun flx-make-filename-cache ()
   "Return cache hashtable appropraite for storeing filenames."
   (flx-make-string-cache 'flx-get-heatmap-file))
@@ -278,38 +250,74 @@ e.g. (\"aab\" \"ab\") returns
   "return best score matching QUERY against STR"
   (unless (or (zerop (length query))
               (zerop (length str)))
-    (let* ((info-hash (flx-process-cache str cache))
-           (heatmap (gethash 'heatmap info-hash))
-           (matches (flx-get-matches info-hash query))
-           (query-length (length query))
-           (full-match-boost (and (< query-length 5)
-                                  (> query-length 1)))
-           (best-score nil))
-      (mapc (lambda (match-positions)
-              (let ((score (if (and
-                                full-match-boost
-                                (= (length match-positions)
-                                   (length str)))
-                               10000
-                             0))
-                    (contiguous-count 0)
-                    last-match)
-                (cl-loop for index in match-positions
-                      do (progn
-                           (if (and last-match
-                                    (= (1+ last-match) index))
-                               (cl-incf contiguous-count)
-                             (setq contiguous-count 0))
-                           (cl-incf score (aref heatmap index))
-                           (when (> contiguous-count 0)
-                             (cl-incf score (+ 45 (* 15 (min contiguous-count 4)))))
-                           (setq last-match index)))
-                (if (or (null best-score)
-                        (> score (car best-score)))
-                    (setq best-score (cons score match-positions)))))
-            matches)
-      best-score)))
+    (cl-letf*
+        ((hash (flx-process-cache str cache))
+         (heatmap (gethash 'heatmap hash))
+         (query-length (length query))
+         (full-match-boost (and (< query-length 5)
+                                (> query-length 1)))
 
+         ;; Dynamic Programming table
+         (match-cache (make-hash-table :test 'equal :size 10))
+
+         ;; local variables to be used later
+         (best-score most-negative-fixnum)
+         (indexes nil)
+
+         ((symbol-function #'flx-get-matches-worker)
+          (lambda (greater-than q-index)
+            (or
+             (gethash
+              (cons greater-than q-index) match-cache)
+             (puthash
+              (cons greater-than q-index)
+              (progn
+                (setq indexes (flx-bigger-sublist
+                               (gethash (aref query q-index) hash)
+                               greater-than))
+                (if (>= q-index (1- query-length))
+                    (mapcar (lambda (index)
+                              (cons (list index)
+                                    (cons (aref heatmap index) 0))) indexes)
+                  (let ((matches) (duplicate-scores most-negative-fixnum))
+                    (dolist (index indexes matches)
+                      (dolist (elem
+                               (mapcar
+                                (lambda (object)
+                                  (cons (cons index (car object))
+                                        (cons
+                                         (+ (car (cdr object))
+                                            (aref heatmap index)
+                                            (if (= (1- (caar object)) index)
+                                                (+ (* (min (1+ (cddr object))
+                                                           4)
+                                                      15)
+                                                   45)
+                                              0)
+                                            (if (and full-match-boost
+                                                     (= (1+ (length
+                                                             (car object)))
+                                                        (length str)))
+                                                10000
+                                              0))
+                                         (if (= (1- (caar object)) index)
+                                             (1+ (cddr object))
+                                           0))))
+
+                            (flx-get-matches-worker index (1+ q-index))))
+
+                        ;; we only care about the optimal score
+                        (when (> (car (cdr elem))
+                                 duplicate-scores)
+                          (setq duplicate-scores (car (cdr elem)))
+                          (push elem matches)))))))
+              match-cache)))))
+
+      ;; postprocess candidate
+      (let ((res (flx-get-matches-worker nil 0)))
+        (and res
+             (cons (car (cdr (car res)))
+                   (car (car res))))))))
 
 (defun flx-propertize (obj score &optional add-score)
   "Return propertized copy of obj according to score.
