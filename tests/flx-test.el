@@ -79,21 +79,6 @@
   (let ((vec (vector 1 2 3)))
     (should (equal (vector 2 3 4) (flx-inc-vec vec)))))
 
-(ert-deftest flx-matches-basic ()
-  (let* ((str "aggg")
-         (h (flx-get-hash-for-string str 'flx-get-heatmap-str))
-         (res (flx-get-matches h "g")))
-    (should (equal res '((1) (2) (3))))))
-
-
-(ert-deftest flx-matches-more ()
-  (let* ((str "ab-gh-ab")
-         (h (flx-get-hash-for-string str 'flx-get-heatmap-str))
-         (res (flx-get-matches h "ab")))
-    (should (equal res '((0 1)
-                         (0 7)
-                         (6 7))))))
-
 (ert-deftest flx-get-heatmap-vector-basic ()
   "see worksheet for derivation"
   (let ((res (flx-get-heatmap-file "__abcab")))
