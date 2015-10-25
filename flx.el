@@ -292,7 +292,8 @@ See documentation for logic."
         ((str-info (flx-process-cache str cache))
          (heatmap (gethash 'heatmap str-info))
          (query-length (length query))
-         (full-match-boost (< 1 query-length 5))
+         (full-match-boost (and (< 1 query-length)
+                              (< query-length 5)))
 
          ;; Dynamic Programming table
          (match-cache (make-hash-table :test 'eql :size 10))
