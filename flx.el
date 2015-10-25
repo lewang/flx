@@ -1,4 +1,4 @@
-;;; flx.el --- fuzzy matching with good sorting
+;;; flx.el --- fuzzy matching with good sorting -*- lexical-binding: t -*-
 
 ;; Copyright © 2013 Le Wang
 
