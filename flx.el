@@ -245,76 +245,68 @@ See documentation for logic."
             (puthash str res cache))
           res))))
 
+(defun flx-get-matches-worker (greater-than q-index query-length heatmap match-cache str-info query)
+  (let ((hash-key (+ q-index
+                     (* (or greater-than 0)
+                        query-length))))
+    (or
+     (gethash hash-key match-cache)
+     (puthash
+      hash-key
+      (let ((indexes (flx-bigger-sublist
+                      (gethash (aref query q-index) str-info)
+                      greater-than)))
+        (if (>= q-index (1- query-length))
+            (mapcar (lambda (index)
+                      (cons (list index)
+                            (cons (aref heatmap index) 0))) indexes)
+          (let ((match) (best-score most-negative-fixnum))
+            (dolist (index indexes (and match (list match)))
+              (dolist (elem (flx-get-matches-worker index (1+ q-index)
+                                                    query-length heatmap match-cache str-info query))
+                (setq elem
+                      (cons (cons index (car elem))
+                            (cons
+                             (+ (cadr elem)
+                                (aref heatmap index)
+                                (if (= (1- (caar elem)) index)
+                                    (+ (* (min (cddr elem)
+                                               3)
+                                          15)
+                                       60)
+                                  0))
+                             (if (= (1- (caar elem)) index)
+                                 (1+ (cddr elem))
+                               0))))
+                ;; we only care about the optimal score
+                (when (> (cadr elem) best-score)
+                  (setq best-score (cadr elem)
+                        match elem)))))))
+      match-cache))))
 
 (defun flx-score (str query &optional cache)
   "return best score matching QUERY against STR"
   (unless (or (zerop (length query))
               (zerop (length str)))
-    (cl-letf*
-        ((hash (flx-process-cache str cache))
-         (heatmap (gethash 'heatmap hash))
+    (let*
+        ((str-info (flx-process-cache str cache))
+         (heatmap (gethash 'heatmap str-info))
          (query-length (length query))
-         (full-match-boost (and (< query-length 5)
-                                (> query-length 1)))
+         (full-match-boost (< 1 query-length 5))
 
          ;; Dynamic Programming table
          (match-cache (make-hash-table :test 'eql :size 10))
-
-         ;; local variable to be used later
-         (indexes nil)
-         (hash-key 0)
-
-         ((symbol-function #'flx-get-matches-worker)
-          (lambda (greater-than q-index)
-            (or
-             (gethash
-              (setq hash-key (+ q-index
-                                (* (or greater-than 0)
-                                   query-length)))
-              match-cache)
-             (puthash
-              hash-key
-              (progn
-                (setq indexes (flx-bigger-sublist
-                               (gethash (aref query q-index) hash)
-                               greater-than))
-                (if (>= q-index (1- query-length))
-                    (mapcar (lambda (index)
-                              (cons (list index)
-                                    (cons (aref heatmap index) 0))) indexes)
-                  (let ((match) (best-score most-negative-fixnum))
-                    (dolist (index indexes (and match (list match)))
-                      (dolist (elem (flx-get-matches-worker index (1+ q-index)))
-                        (setq elem
-                          (cons (cons index (car elem))
-                                (cons
-                                 (+ (cadr elem)
-                                    (aref heatmap index)
-                                    (if (= (1- (caar elem)) index)
-                                        (+ (* (min (cddr elem)
-                                                   3)
-                                              15)
-                                           60)
-                                      0))
-                                 (if (= (1- (caar elem)) index)
-                                     (1+ (cddr elem))
-                                   0))))
-                        ;; we only care about the optimal score
-                        (when (> (cadr elem) best-score)
-                          (setq best-score (cadr elem)
-                                match elem)))))))
-              match-cache)))))
-
+         (res (flx-get-matches-worker nil 0
+                                      query-length heatmap match-cache str-info query)))
       ;; postprocess candidate
-      (let ((res (flx-get-matches-worker nil 0)))
-        (and res
-             (cons (+ (cadar res)
-                      (if (and full-match-boost
-                               (=  (length (caar res))
-                                   (length str)))
-                          10000
-                        0))
-                   (caar res)))))))
+      (and res
+         (cons (+ (cadar res)
+                  (if (and full-match-boost
+                         (=  (length (caar res))
+                             (length str)))
+                      10000
+                    0))
+               (caar res))))))
 
 (defun flx-propertize (obj score &optional add-score)
   "Return propertized copy of obj according to score.
