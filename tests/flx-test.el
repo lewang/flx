@@ -352,7 +352,7 @@ substring can overpower abbreviation."
 
 ;;; perf
 
-(ert-deftest flx-prune-paths-optimizations ()
+(ert-deftest flx-prune-search-space-optimizations ()
   "Make sure optimizations that prune bad paths early are working."
   (let ((future (async-start
                  `(lambda ()
