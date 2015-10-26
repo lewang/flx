@@ -25,7 +25,7 @@
 
 ;; Cask
 (setq package-user-dir
-      (expand-file-name (format "~/.cask/%s/elpa" emacs-version)))
+      (expand-file-name (format ".cask/%s/elpa" emacs-version) flx-root-dir))
 (package-initialize)
 
 
