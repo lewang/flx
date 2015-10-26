@@ -301,7 +301,7 @@ See documentation for logic."
                                       query-length heatmap match-cache str-info query)))
       ;; postprocess candidate
       (and res
-         (cons (+ (cadar res)
+         (cons (+ (cl-cadar res)
                   (if (and full-match-boost
                          (=  (length (caar res))
                              (length str)))
