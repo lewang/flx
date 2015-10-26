@@ -272,14 +272,15 @@ See documentation for logic."
             (dolist (index indexes (and match (list match)))
               (dolist (elem (flx-get-matches-worker index (1+ q-index)
                                                     query-length heatmap match-cache str-info query))
-                (setq score (+ (cadr elem)
-                               (aref heatmap index)
-                               (if (= (1- (caar elem)) index)
-                                   (+ (* (min (cddr elem)
-                                              3)
-                                         15)
-                                      60)
-                                 0)))
+                (setq score (if (= (1- (caar elem)) index)
+                                (+ (cadr elem)
+                                   (aref heatmap index)
+                                   (* (min (cddr elem)
+                                           3)
+                                      15)
+                                   60)
+                              (+ (cadr elem)
+                                 (aref heatmap index))))
 
                 ;; we only care about the optimal score
                 (when (> score best-score)
@@ -308,12 +309,11 @@ See documentation for logic."
                                       query-length heatmap match-cache str-info query)))
       ;; postprocess candidate
       (and res
-         (cons (+ (cl-cadar res)
-                  (if (and full-match-boost
-                         (=  (length (caar res))
-                             (length str)))
-                      10000
-                    0))
+           (cons (if (and full-match-boost
+                          (=  (length (caar res))
+                              (length str)))
+                     (+ (cl-cadar res) 10000)
+                   (cl-cadar res))
                (caar res))))))
 
 (defun flx-propertize (obj score &optional add-score)
