@@ -1,5 +1,5 @@
 (source gnu)
-;(source melpa)
+(source melpa)
 
 (development
  (depends-on "async"))
