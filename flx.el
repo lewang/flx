@@ -52,6 +52,16 @@
 
 (require 'cl-lib)
 
+(defgroup flx nil
+  "Fuzzy matching with good sorting"
+  :group 'convenience
+  :prefix "flx-")
+
+(defcustom flx-word-separators '(?\  ?- ?_ ?: ?. ?/ ?\\)
+  "List of characters that act as word separators in flx"
+  :type '(repeat character)
+  :group 'flx)
+
 (defface flx-highlight-face  '((t (:inherit font-lock-variable-name-face :bold t :underline t)))
   "Face used by flx for highlighting flx match characters."
   :group 'flx)
@@ -60,7 +70,7 @@
 (defsubst flx-word-p (char)
   "Check if CHAR is a word character."
   (and char
-       (not (memq char '(?\  ?- ?_ ?: ?. ?/ ?\\)))))
+       (not (memq char flx-word-separators))))
 
 (defsubst flx-capital-p (char)
   "Check if CHAR is an uppercase character."
@@ -69,9 +79,9 @@
        (= char (upcase char))))
 
 (defsubst flx-boundary-p (last-char char)
-  "Check is LAST-CHAR is the end of a word and CHAR the start of the next.
+  "Check if LAST-CHAR is the end of a word and CHAR the start of the next.
 
-The function is camel-case aware."
+This function is camel-case aware."
   (or (null last-char)
       (and (not (flx-capital-p last-char))
            (flx-capital-p char))
@@ -79,9 +89,8 @@ The function is camel-case aware."
            (flx-word-p char))))
 
 (defsubst flx-inc-vec (vec &optional inc beg end)
-  "increment each element of vectory by INC(default=1)
-from BEG (inclusive) to end (not inclusive).
-"
+  "Increment each element of vectory by INC(default=1)
+from BEG (inclusive) to END (not inclusive)."
   (or inc
       (setq inc 1))
   (or beg
@@ -94,8 +103,8 @@ from BEG (inclusive) to end (not inclusive).
   vec)
 
 (defun flx-get-hash-for-string (str heatmap-func)
-  "Return hash-table for string where keys are characters value
-  is a sorted list of indexes for character occurrences."
+  "Return hash-table for string where keys are characters.
+Value is a sorted list of indexes for character occurrences."
   (let* ((res (make-hash-table :test 'eq :size 32))
          (str-len (length str))
          down-char)
@@ -114,7 +123,7 @@ from BEG (inclusive) to end (not inclusive).
 
 ;; So we store one fixnum per character.  Is this too memory inefficient?
 (defun flx-get-heatmap-str (str &optional group-separator)
-  "Generate heat map vector of string.
+  "Generate the heatmap vector of string.
 
 See documentation for logic."
   (let* ((str-len (length str))
@@ -211,7 +220,7 @@ See documentation for logic."
 
 
 (defsubst flx-bigger-sublist (sorted-list val)
-  "return sublist bigger than VAL from sorted SORTED-LIST
+  "Return sublist bigger than VAL from sorted SORTED-LIST
 
   if VAL is nil, return entire list."
   (if val
@@ -249,11 +258,11 @@ e.g. (\"aab\" \"ab\") returns
       (mapcar 'list indexes))))
 
 (defun flx-make-filename-cache ()
-  "Return cache hashtable appropraite for storeing filenames."
+  "Return cache hashtable appropraite for storing filenames."
   (flx-make-string-cache 'flx-get-heatmap-file))
 
 (defun flx-make-string-cache (&optional heat-func)
-  "Return cache hashtable appropraite for storeing strings."
+  "Return cache hashtable appropraite for storing strings."
   (let ((hash (make-hash-table :test 'equal
                                :size 4096)))
     (puthash 'heatmap-func (or heat-func 'flx-get-heatmap-str) hash)
@@ -275,7 +284,7 @@ e.g. (\"aab\" \"ab\") returns
 
 
 (defun flx-score (str query &optional cache)
-  "return best score matching QUERY against STR"
+  "Return best score matching QUERY against STR"
   (unless (or (zerop (length query))
               (zerop (length str)))
     (let* ((info-hash (flx-process-cache str cache))
@@ -321,14 +330,13 @@ SCORE of nil means to clear the properties."
                  (substring-no-properties (car obj))
                (substring-no-properties obj))))
 
-    (unless (null score)
-      (cl-loop for char in (cdr score)
-            do (progn
-                 (when (and last-char
-                            (not (= (1+ last-char) char)))
-                   (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
-                   (setq block-started char))
-                 (setq last-char char)))
+    (when score
+      (dolist (char (cdr score))
+        (when (and last-char
+                   (not (= (1+ last-char) char)))
+          (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+          (setq block-started char))
+        (setq last-char char))
       (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
       (when add-score
         (setq str (format "%s [%s]" str (car score)))))
