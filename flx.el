@@ -331,14 +331,13 @@ SCORE of nil means to clear the properties."
                  (substring-no-properties (car obj))
                (substring-no-properties obj))))
 
-    (unless (null score)
-      (cl-loop for char in (cdr score)
-            do (progn
-                 (when (and last-char
-                            (not (= (1+ last-char) char)))
-                   (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
-                   (setq block-started char))
-                 (setq last-char char)))
+    (when score
+      (dolist (char (cdr score))
+        (when (and last-char
+                   (not (= (1+ last-char) char)))
+          (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+          (setq block-started char))
+        (setq last-char char))
       (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
       (when add-score
         (setq str (format "%s [%s]" str (car score)))))
