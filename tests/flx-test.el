@@ -358,7 +358,7 @@ substring can overpower abbreviation."
                  `(lambda ()
                     ,(async-inject-variables "\\`load-path\\'")
                     (require 'flx)
-                    (flx-score "~/foo/bar/blah.elllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" "lllllll" (flx-make-filename-cache)))
+                    (flx-score "~/foo/bar/blah.elllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" "lllllllllllllllllllllllllllllllll" (flx-make-filename-cache)))
                  nil))
         result)
     (with-timeout (1 (kill-process future) )
