@@ -52,6 +52,16 @@
 
 (require 'cl-lib)
 
+(defgroup flx nil
+  "Fuzzy matching with good sorting"
+  :group 'convenience
+  :prefix "flx-")
+
+(defcustom flx-word-separators '(?\  ?- ?_ ?: ?. ?/ ?\\)
+  "List of characters that act as word separators in flx"
+  :type '(repeat character)
+  :group 'flx)
+
 (defface flx-highlight-face  '((t (:inherit font-lock-variable-name-face :bold t :underline t)))
   "Face used by flx for highlighting flx match characters."
   :group 'flx)
@@ -60,7 +70,7 @@
 (defsubst flx-word-p (char)
   "Check if CHAR is a word character."
   (and char
-       (not (memq char '(?\  ?- ?_ ?: ?. ?/ ?\\)))))
+       (not (memq char flx-word-separators))))
 
 (defsubst flx-capital-p (char)
   "Check if CHAR is an uppercase character."
