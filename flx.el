@@ -252,45 +252,57 @@ See documentation for logic."
                                match-cache
                                str-info
                                query)
-  (let ((hash-key (+ q-index
-                     (* (or greater-than 0)
-                        query-length))))
-    (or
-     (gethash hash-key match-cache)
-     (puthash
-      hash-key
+  (let* ((hash-key (+ q-index
+                      (* (or greater-than 0)
+                         query-length)))
+         (hash-value (gethash hash-key match-cache)))
+    (if hash-value
+        (if (eq hash-value 'no-match)
+            nil
+          hash-value)
       (let ((indexes (flx-bigger-sublist
-                      (gethash (aref query q-index) str-info)
-                      greater-than)))
-        (if (>= q-index (1- query-length))
-            (mapcar (lambda (index)
-                      (cons (list index)
-                            (cons (aref heatmap index) 0))) indexes)
-          (let ((match)
-                (score)
-                (best-score most-negative-fixnum))
-            (dolist (index indexes (and match (list match)))
-              (dolist (elem (flx-get-matches-worker index (1+ q-index)
-                                                    query-length heatmap match-cache str-info query))
-                (setq score (if (= (1- (caar elem)) index)
-                                (+ (cadr elem)
-                                   (aref heatmap index)
-                                   (* (min (cddr elem)
-                                           3)
-                                      15)
-                                   60)
-                              (+ (cadr elem)
-                                 (aref heatmap index))))
+                       (gethash (aref query q-index) str-info)
+                       greater-than))
+            (match)
+            (score)
+            (best-score most-negative-fixnum))
 
-                ;; we only care about the optimal score
-                (when (> score best-score)
-                  (setq best-score score
-                        match (cons (cons index (car elem))
-                                    (cons score
-                                          (if (= (1- (caar elem)) index)
-                                              (1+ (cddr elem))
-                                            0))))))))))
-      match-cache))))
+        (if (>= q-index (1- query-length))
+            (setq match (mapcar (lambda (index)
+                                  (cons (list index)
+                                        (cons (aref heatmap index) 0)))
+                                indexes))
+          (dolist (index indexes)
+            (dolist (elem (flx-get-matches-worker index (1+ q-index)
+                                                  query-length
+                                                  heatmap
+                                                  match-cache
+                                                  str-info
+                                                  query))
+              (setq score (if (= (1- (caar elem)) index)
+                              (+ (cadr elem)
+                                 (aref heatmap index)
+                                 (* (min (cddr elem)
+                                         3)
+                                    15)
+                                 60)
+                            (+ (cadr elem)
+                               (aref heatmap index))))
+
+              ;; we only care about the optimal score
+              (when (> score best-score)
+                (setq best-score score
+                      match (list (cons (cons index (car elem))
+                                        (cons score
+                                              (if (= (1- (caar elem))
+                                                     index)
+                                                  (1+ (cddr elem))
+                                                0)))))))))
+
+        (puthash hash-key
+                 (if match match 'no-match)
+                 match-cache)
+        match))))
 
 (defun flx-score (str query &optional cache)
   "return best score matching QUERY against STR"
@@ -306,7 +318,11 @@ See documentation for logic."
          ;; Dynamic Programming table
          (match-cache (make-hash-table :test 'eql :size 10))
          (res (flx-get-matches-worker nil 0
-                                      query-length heatmap match-cache str-info query)))
+                                      query-length
+                                      heatmap
+                                      match-cache
+                                      str-info
+                                      query)))
       ;; postprocess candidate
       (and res
            (cons (if (and full-match-boost
