@@ -245,13 +245,13 @@ See documentation for logic."
             (puthash str res cache))
           res))))
 
-(defun flx-get-matches-worker (greater-than
-                               q-index
-                               query-length
-                               heatmap
-                               match-cache
-                               str-info
-                               query)
+(defun flx-find-best-match (greater-than
+                            q-index
+                            query-length
+                            heatmap
+                            match-cache
+                            str-info
+                            query)
   (let* ((hash-key (+ q-index
                       (* (or greater-than 0)
                          query-length)))
@@ -273,12 +273,12 @@ See documentation for logic."
                                         (cons (aref heatmap index) 0)))
                                 indexes))
           (dolist (index indexes)
-            (dolist (elem (flx-get-matches-worker index (1+ q-index)
-                                                  query-length
-                                                  heatmap
-                                                  match-cache
-                                                  str-info
-                                                  query))
+            (dolist (elem (flx-find-best-match index (1+ q-index)
+                                               query-length
+                                               heatmap
+                                               match-cache
+                                               str-info
+                                               query))
               (setq score (if (= (1- (caar elem)) index)
                               (+ (cadr elem)
                                  (aref heatmap index)
@@ -313,16 +313,16 @@ See documentation for logic."
          (heatmap (gethash 'heatmap str-info))
          (query-length (length query))
          (full-match-boost (and (< 1 query-length)
-                              (< query-length 5)))
+                                (< query-length 5)))
 
          ;; Dynamic Programming table
          (match-cache (make-hash-table :test 'eql :size 10))
-         (res (flx-get-matches-worker nil 0
-                                      query-length
-                                      heatmap
-                                      match-cache
-                                      str-info
-                                      query)))
+         (res (flx-find-best-match nil 0
+                                   query-length
+                                   heatmap
+                                   match-cache
+                                   str-info
+                                   query)))
       ;; postprocess candidate
       (and res
            (cons (if (and full-match-boost
