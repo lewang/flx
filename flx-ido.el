@@ -233,6 +233,14 @@ Our implementation always uses flex and doesn't care about substring matches."
        items)
       (delete-consecutive-dups (nreverse matches) t))))
 
+;;;###autoload
+(define-minor-mode flx-ido-mode
+  "Toggle flx ido mode"
+  :init-value nil
+  :lighter ""
+  :group 'ido
+  :global t)
+
 (defadvice ido-exit-minibuffer (around flx-ido-reset activate)
   "Remove flx properties after."
   (let* ((obj (car ido-matches))
@@ -275,14 +283,6 @@ Our implementation always uses flex and doesn't care about substring matches."
       (flx-ido-reset))))
 
 (add-hook 'ido-minibuffer-setup-hook 'flx-ido-reset nil)
-
-;;;###autoload
-(define-minor-mode flx-ido-mode
-  "Toggle flx ido mode"
-  :init-value nil
-  :lighter ""
-  :group 'ido
-  :global t)
 
 (provide 'flx-ido)
 
