@@ -1,12 +1,12 @@
 ;;; flx.el --- fuzzy matching with good sorting
 
-;; Copyright © 2013 Le Wang
+;; Copyright © 2013, 2015 Le Wang
 
 ;; Author: Le Wang
 ;; Maintainer: Le Wang
 ;; Description: fuzzy matching with good sorting
 ;; Created: Wed Apr 17 01:01:41 2013 (+0800)
-;; Version: 0.6
+;; Version: 0.6.1
 ;; Package-Requires: ((cl-lib "0.3"))
 ;; URL: https://github.com/lewang/flx
 

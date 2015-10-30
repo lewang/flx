@@ -1,12 +1,12 @@
 ;;; flx-ido.el --- flx integration for ido
 
-;; Copyright © 2013 Le Wang
+;; Copyright © 2013, 2015 Le Wang
 
 ;; Author: Le Wang
 ;; Maintainer: Le Wang
 ;; Description: flx integration for ido
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
-;; Version: 0.5
+;; Version: 0.6.1
 ;; URL: https://github.com/lewang/flx
 ;; Package-Requires: ((flx "0.1") (cl-lib "0.3"))
 
