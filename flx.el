@@ -240,19 +240,15 @@ See documentation for logic."
     (puthash 'heatmap-func (or heat-func 'flx-get-heatmap-str) hash)
     hash))
 
-(defun flx-process-cache (str cache)
+(defsubst flx-process-cache (str &optional cache)
   "Get calculated heatmap from cache, add it if necessary."
-  (let ((res (when cache
-               (gethash str cache))))
-    (or res
-        (progn
-          (setq res (flx-get-hash-for-string
-                     str
-                     (or (and cache (gethash 'heatmap-func cache))
-                         'flx-get-heatmap-str)))
-          (when cache
-            (puthash str res cache))
-          res))))
+  (if cache
+      (or (gethash str cache)
+          (puthash str (flx-get-hash-for-string
+                        str
+                        (gethash 'heatmap-func cache))
+                   cache))
+    (flx-get-hash-for-string str 'flx-get-heatmap-str)))
 
 (defun flx-find-best-match (str-info
                             heatmap
