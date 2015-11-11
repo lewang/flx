@@ -173,24 +173,23 @@ See documentation for logic."
                      ;; this is the number of effective word groups
                      (words-length (length (cddr group)))
                      basepath-p)
-                 (when (and (not (zerop words-length))
-                            (not basepath-found))
-                   (setq basepath-found t)
-                   (setq basepath-p t))
+                 (when (not (or (zerop words-length)
+                                basepath-found))
+                   (setq basepath-found t
+                         basepath-p t))
                  (let (num)
                    (setq num
                          (if basepath-p
                              (+ 35
                                 ;; ++++ basepath separator-count boosts
-                                (if (> separator-count 1)
-                                    (1- separator-count)
-                                  0)
+                                (max (1- separator-count)
+                                     0)
                                 ;; ++++ basepath word count penalty
                                 (- word-count))
                            ;; ++++ non-basepath penalties
                            (if (= index 0)
                                -3
-                             (+ -5 (1- index)))))
+                             (- index 6))))
                    (flx-inc-vec scores num (1+ group-start)
                                 (or last-group-limit (length scores))))
                  (cl-loop for word in (cddr group)
