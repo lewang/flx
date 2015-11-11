@@ -223,11 +223,13 @@ See documentation for logic."
   "Return sublist bigger than VAL from sorted SORTED-LIST
 
   if VAL is nil, return entire list."
-  (if val
-      (cl-loop for sub on sorted-list
-            do (when (> (car sub) val)
-                 (cl-return sub)))
-      sorted-list))
+  (if (zerop val)
+      sorted-list
+    (catch 'return
+      (while sorted-list
+        (if (> (car sorted-list) val)
+            (throw 'return sorted-list)
+          (setq sorted-list (cdr sorted-list)))))))
 
 (defun flx-make-filename-cache ()
   "Return cache hashtable appropraite for storing filenames."
@@ -268,7 +270,7 @@ For other parameters, see `flx-score'"
   ;; Or, (mod hash-key query-length) to get q-index
   ;; We use this instead of a cons key for the sake of efficiency
   (let* ((hash-key (+ q-index
-                      (* (or greater-than 0)
+                      (* greater-than
                          query-length)))
          (hash-value (gethash hash-key match-cache)))
     (if hash-value
@@ -349,7 +351,7 @@ For other parameters, see `flx-score'"
                            str-info
                            ;; heatmap
                            (gethash 'heatmap str-info)
-                           nil
+                           0
                            query
                            query-length
                            0
