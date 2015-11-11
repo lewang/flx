@@ -336,33 +336,34 @@ For other parameters, see `flx-score'"
   "Return best score matching QUERY against STR"
   (unless (or (zerop (length query))
               (zerop (length str)))
-    (let*
-        ((str-info (flx-process-cache str cache))
-         (heatmap (gethash 'heatmap str-info))
-         (query-length (length query))
-         (full-match-boost (and (< 1 query-length)
-                                (< query-length 5)))
+    (let ((str-info (flx-process-cache str cache))
+          (query-length (length query))
 
-         ;; Raise recursion limit
-         (max-lisp-eval-depth 5000)
-         (max-specpdl-size 10000)
+          ;; Raise recursion limit
+          (max-lisp-eval-depth 5000)
+          (max-specpdl-size 10000)
 
-         ;; Dynamic Programming table for memoizing flx-find-best-match
-         (match-cache (make-hash-table :test 'eql :size 10))
+          (optimal-match))
 
-         (optimal-match (flx-find-best-match str-info
-                                             heatmap
-                                             nil
-                                             query
-                                             query-length
-                                             0
-                                             match-cache)))
+      (setq optimal-match (flx-find-best-match
+                           str-info
+                           ;; heatmap
+                           (gethash 'heatmap str-info)
+                           nil
+                           query
+                           query-length
+                           0
+                           ;; Dynamic Programming table for memoizing
+                           (make-hash-table :test 'eql
+                                            :size 10)))
       ;; Postprocess candidate
       (and optimal-match
            (cons
             ;; This is the computed score, adjusted to boost the scores
-            ;; of exact matches.
-            (if (and full-match-boost
+            ;; of exact matches for short queries. It's assumed that longer
+            ;; queries will get large scores anyway.
+            (if (and (< 1 query-length)
+                     (< query-length 5)
                      (=  (length (caar optimal-match))
                          (length str)))
                 (+ (cl-cadar optimal-match) 10000)
