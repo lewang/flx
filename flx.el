@@ -134,19 +134,20 @@ See documentation for logic."
     ;; Establish baseline mapping
     (cl-loop for char across str
           for index from 0
-          with last-char = nil
+          with last-char = ?-
           with group-word-count = 0
           do (progn
-               (let ((effective-last-char
-                      ;; before we find any words, all separaters are
-                      ;; considered words of length 1.  This is so "foo/__ab"
-                      ;; gets penalized compared to "foo/ab".
-                      (if (zerop group-word-count) nil last-char)))
-                 (when (flx-boundary-p effective-last-char char)
-                   (setcdr (cdar groups-alist) (cons index (cl-cddar groups-alist))))
-                 (when (and (not (flx-word-p last-char))
-                            (flx-word-p char))
-                   (cl-incf group-word-count)))
+               ;; before we find any words, all separaters are
+               ;; considered words of length 1.  This is so "foo/__ab"
+               ;; gets penalized compared to "foo/ab".
+               (when (or (zerop group-word-count)
+                         (flx-boundary-p last-char
+                                         char))
+                 (setcdr (cdar groups-alist)
+                         (cons index (cl-cddar groups-alist))))
+               (when (and (not (flx-word-p last-char))
+                          (flx-word-p char))
+                 (cl-incf group-word-count))
                ;; ++++ -45 penalize extension
                (when (eq last-char penalty-lead)
                  (cl-incf (aref scores index) -45))
