@@ -102,10 +102,9 @@ from BEG (inclusive) to END (not inclusive)."
 (defun flx-get-hash-for-string (str heatmap-func)
   "Return hash-table for string where keys are characters.
 Value is a sorted list of indexes for character occurrences."
-  (let* ((res (make-hash-table :test 'eq :size (length str)))
-         (str-len (length str))
-         down-char)
-    (cl-loop for index from (1- str-len) downto 0
+  (let ((res (make-hash-table :test 'eq :size (length str)))
+        down-char)
+    (cl-loop for index from (1- (length str)) downto 0
              for char = (aref str index)
           do (progn
                ;; simulate `case-fold-search'
