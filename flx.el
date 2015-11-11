@@ -91,15 +91,9 @@ This function is camel-case aware."
            (and (not (flx-capital-p last-char))
              (flx-capital-p char)))))
 
-(defsubst flx-inc-vec (vec &optional inc beg end)
+(defsubst flx-inc-vec (vec inc beg end)
   "Increment each element of vectory by INC(default=1)
 from BEG (inclusive) to END (not inclusive)."
-  (or inc
-      (setq inc 1))
-  (or beg
-      (setq beg 0))
-  (or end
-      (setq end (length vec)))
   (while (< beg end)
     (cl-incf (aref vec beg) inc)
     (cl-incf beg))
@@ -168,7 +162,7 @@ See documentation for logic."
            (separator-count (1- group-count)))
       ;; ++++ slash group-count penalty
       (unless (zerop separator-count)
-        (flx-inc-vec scores (* -2 group-count)))
+        (flx-inc-vec scores (* -2 group-count) 0 (length scores)))
       ;; score each group further
       (cl-loop for group in groups-alist
             for index from separator-count downto 0
@@ -197,7 +191,8 @@ See documentation for logic."
                            (if (= index 0)
                                -3
                              (+ -5 (1- index)))))
-                   (flx-inc-vec scores num (1+ group-start) last-group-limit))
+                   (flx-inc-vec scores num (1+ group-start)
+                                (or last-group-limit (length scores))))
                  (cl-loop for word in (cddr group)
                        for word-index from (1- words-length) downto 0
                        with last-word = (or last-group-limit
