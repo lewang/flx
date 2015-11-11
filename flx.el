@@ -67,26 +67,29 @@
   :group 'flx)
 
 ;;; Do we need more word separators than ST?
-(defsubst flx-word-p (char)
+(defsubst flx-separator-p (char)
   "Check if CHAR is a word character."
-  (and char
-       (not (memq char flx-word-separators))))
+  (memq char flx-word-separators))
 
 (defsubst flx-capital-p (char)
   "Check if CHAR is an uppercase character."
-  (and char
-       (flx-word-p char)
-       (= char (upcase char))))
+  (= char (upcase char)))
 
 (defsubst flx-boundary-p (last-char char)
   "Check if LAST-CHAR is the end of a word and CHAR the start of the next.
 
 This function is camel-case aware."
-  (or (null last-char)
-      (and (not (flx-capital-p last-char))
-           (flx-capital-p char))
-      (and (not (flx-word-p last-char))
-           (flx-word-p char))))
+  ;; The following is logically equivalent to:
+  ;; (or (and (not (and (not (flx-separator-p last-char))
+  ;;                    (flx-capital-p last-char)))
+  ;;          (and (not (flx-separator-p char))
+  ;;               (flx-capital-p char)))
+  ;;     (and (flx-separator-p last-char)
+  ;;          (not (flx-separator-p char))))
+  (and (not (flx-separator-p char))
+       (or (flx-separator-p last-char)
+           (and (not (flx-capital-p last-char))
+             (flx-capital-p char)))))
 
 (defsubst flx-inc-vec (vec &optional inc beg end)
   "Increment each element of vectory by INC(default=1)
@@ -112,7 +115,8 @@ Value is a sorted list of indexes for character occurrences."
              for char = (aref str index)
           do (progn
                ;; simulate `case-fold-search'
-               (if (flx-capital-p char)
+               (if (and (not (flx-separator-p char))
+                        (flx-capital-p char))
                    (progn
                      (push index (gethash char res))
                      (setq down-char (downcase char)))
