@@ -123,12 +123,12 @@ Value is a sorted list of indexes for character occurrences."
   "Generate the heatmap vector of string.
 
 See documentation for logic."
-  (let* ((str-len (length str))
-         (str-last-index (1- str-len))
-         ;; ++++ base
-         (scores (make-vector str-len -35))
-         (penalty-lead ?.)
-         (groups-alist (list (list -1 0))))
+  (let ((str-len (length str))
+        (str-last-index (1- (length str)))
+        ;; ++++ base
+        (scores (make-vector (length str) -35))
+        (penalty-lead ?.)
+        (groups-alist (list (list -1 0))))
     ;; ++++ final char bonus
     (cl-incf (aref scores str-last-index) 1)
     ;; Establish baseline mapping
