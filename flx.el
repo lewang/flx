@@ -274,7 +274,7 @@ For other parameters, see `flx-score'"
     (if hash-value
         ;; Here, we use the value 'no-match to distinguish a cache miss
         ;; from a nil (i.e. non-matching) return value
-        (if (eq hash-value 'no-match)
+        (if (eq hash-value 0)
             nil
           hash-value)
       (let ((indexes (flx-bigger-sublist
@@ -328,7 +328,7 @@ For other parameters, see `flx-score'"
 
         ;; Calls are cached to avoid exponential time complexity
         (puthash hash-key
-                 (if match match 'no-match)
+                 (or match 0)
                  match-cache)
         match))))
 
