@@ -113,9 +113,6 @@ kick in again.
 As a point of reference for a 2.3 GHz quad-core i7 processor, a value of
 `10000` still provides a reasonable completion experience.
 
-- see `flx-ido-big-demo` for example with 36k string (Emacs 24.3).
-
-
 
 ## Helm support
 
