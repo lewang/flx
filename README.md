@@ -49,6 +49,11 @@ This version will always be up-to-date.
 user - `flx-ido` is already properly configured and ready for
 action.
 
+### Debian and Ubuntu
+
+Users of Debian 9 or Ubuntu 16.04 or later may simply `apt-get install
+elpa-flx`.
+
 ## Usage
 
 The sorting algorithm is a balance between word beginnings (abbreviation) and
