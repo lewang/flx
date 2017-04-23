@@ -168,7 +168,7 @@ By default Emacs will initiate GC every 0.76 MB allocated (`gc-cons-threshold`
 == 800000).  If we increase this to 20 MB (`gc-cons-threshold` == 20000000)
 we get:
 
-````lisp
+```lisp
 (benchmark-run 1
   (setq gc-cons-threshold 20000000)
   (let ((cache (flx-make-filename-cache)))
