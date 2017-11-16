@@ -67,12 +67,14 @@
 
 Flx will not kick in until collection is filtered below this
 size with idos' default \"flex\" algorithm."
-  :group 'ido)
+  :group 'ido
+  :type 'integer)
 
 
 (defcustom flx-ido-use-faces t
   "Use `flx-highlight-face' to indicate characters contributing to best score."
-  :group 'ido)
+  :group 'ido
+  :type 'boolean)
 
 (unless (fboundp 'delete-consecutive-dups)
   (defun delete-consecutive-dups (list &optional circular)
