@@ -4,12 +4,12 @@
 ;; Copyright © 2018 Arne Babenhauserheide für Disy Informationssysteme GmbH
 
 ;; Author: Le Wang
-;; Maintainer: Arne Babenhauserheide
+;; Maintainer: Le Wang
 ;; Description: fuzzy matching with good sorting -- with hacks
 ;; Created: Wed Apr 17 01:01:41 2013 (+0800)
-;; Version: 0.6.1h
+;; Version: 0.6.2
 ;; Package-Requires: ((cl-lib "0.3"))
-;; URL: https://github.com/ArneBab/flx
+;; URL: https://github.com/lewang/flx
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -31,11 +31,6 @@
 ;; Floor, Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
-
-;; This version adds the flx-stop-splitting-regexp, which is a hack to
-;; get good matching with amx even though amx adds the keyboard
-;; shortcut in parentheses
-
 ;; Implementation notes
 ;; --------------------
 ;;
@@ -52,6 +47,10 @@
 ;; Scott Frazer's blog entry http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
 ;; provided a lot of inspiration.
 ;; ido-hacks was helpful for ido optimization
+;; Arne Babenhauserheide added the flx-stop-splitting-regexp, which is
+;; a hack to get good matching with amx even though amx adds the
+;; keyboard shortcut in parentheses
+
 
 ;;; Code:
 
