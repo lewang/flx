@@ -67,8 +67,10 @@
   :type '(repeat character)
   :group 'flx)
 
-(defcustom flx-stop-splitting-regexp " (.?-"
-  "If not nil, everything after the delimiter is treated as part as the last word."
+(defcustom flx-stop-splitting-regexp nil
+  "If not nil, everything after the delimiter is treated as part as the last word.
+
+Use  \"(.?-\" to have amx shortcut-info appended to the last word."
   :type '(string)
   :group 'flx)
 
