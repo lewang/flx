@@ -1,14 +1,15 @@
 ;;; flx.el --- fuzzy matching with good sorting
 
 ;; Copyright © 2013, 2015 Le Wang
+;; Copyright © 2018 Arne Babenhauserheide für Disy Informationssysteme GmbH
 
 ;; Author: Le Wang
-;; Maintainer: Le Wang
-;; Description: fuzzy matching with good sorting
+;; Maintainer: Arne Babenhauserheide
+;; Description: fuzzy matching with good sorting -- with hacks
 ;; Created: Wed Apr 17 01:01:41 2013 (+0800)
-;; Version: 0.6.1
+;; Version: 0.6.1h
 ;; Package-Requires: ((cl-lib "0.3"))
-;; URL: https://github.com/lewang/flx
+;; URL: https://github.com/ArneBab/flx
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -30,6 +31,10 @@
 ;; Floor, Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
+
+;; This version adds the flx-stop-splitting-regexp, which is a hack to
+;; get good matching with amx even though amx adds the keyboard
+;; shortcut in parentheses
 
 ;; Implementation notes
 ;; --------------------
@@ -62,6 +67,11 @@
   :type '(repeat character)
   :group 'flx)
 
+(defcustom flx-stop-splitting-regexp " (.?-"
+  "If not nil, everything after the delimiter is treated as part as the last word."
+  :type '(string)
+  :group 'flx)
+
 (defface flx-highlight-face  '((t (:inherit font-lock-variable-name-face :bold t :underline t)))
   "Face used by flx for highlighting flx match characters."
   :group 'flx)
@@ -79,14 +89,27 @@
        (= char (upcase char))))
 
 (defsubst flx-boundary-p (last-char char)
-  "Check if LAST-CHAR is the end of a word and CHAR the start of the next.
+  "Check if CHAR is the start of a word.
 
 This function is camel-case aware."
-  (or (null last-char)
-      (and (not (flx-capital-p last-char))
+  (or (null last-char) ;; i.e. ^a
+      (and (not (flx-capital-p last-char)) ;; i.e. aA 
            (flx-capital-p char))
-      (and (not (flx-word-p last-char))
+      (and (not (flx-word-p last-char)) ;; i.e. -a
            (flx-word-p char))))
+
+(defsubst flx-boundary-left-p (last-char char)
+  "Check if LAST-CHAR is the end of a word. 
+
+This function does not match the last word! Use final char bonus for that.
+
+This function is camel-case aware."
+  (and (null last-char) ;; i.e. ^a, never left of a boundary
+       (or
+	(and (not (flx-capital-p last-char)) ;; i.e. aA
+	     (flx-capital-p char))
+	(and (flx-word-p last-char) ;; i.e. a-
+	     (not (flx-word-p char))))))
 
 (defsubst flx-inc-vec (vec &optional inc beg end)
   "Increment each element of vectory by INC(default=1)
@@ -128,7 +151,8 @@ Value is a sorted list of indexes for character occurrences."
 See documentation for logic."
   (let* ((str-len (length str))
          (str-last-index (1- str-len))
-         ;; ++++ base
+         (end-delimiter-index (if (null flx-stop-splitting-regexp) nil (string-match flx-stop-splitting-regexp str)))
+	 ;; ++++ base
          (scores (make-vector str-len -35))
          (penalty-lead ?.)
          (groups-alist (list (list -1 0))))
@@ -145,7 +169,7 @@ See documentation for logic."
                       ;; considered words of length 1.  This is so "foo/__ab"
                       ;; gets penalized compared to "foo/ab".
                       (if (zerop group-word-count) nil last-char)))
-                 (when (flx-boundary-p effective-last-char char)
+                 (when (and (not (null end-delimiter-index)) (flx-boundary-p effective-last-char char))
                    (setcdr (cdar groups-alist) (cons index (cl-cddar groups-alist))))
                  (when (and (not (flx-word-p last-char))
                             (flx-word-p char))
