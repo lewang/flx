@@ -99,19 +99,6 @@ This function is camel-case aware."
       (and (not (flx-word-p last-char)) ;; i.e. -a
            (flx-word-p char))))
 
-(defsubst flx-boundary-left-p (last-char char)
-  "Check if LAST-CHAR is the end of a word. 
-
-This function does not match the last word! Use final char bonus for that.
-
-This function is camel-case aware."
-  (and (null last-char) ;; i.e. ^a, never left of a boundary
-       (or
-	(and (not (flx-capital-p last-char)) ;; i.e. aA
-	     (flx-capital-p char))
-	(and (flx-word-p last-char) ;; i.e. a-
-	     (not (flx-word-p char))))))
-
 (defsubst flx-inc-vec (vec &optional inc beg end)
   "Increment each element of vectory by INC(default=1)
 from BEG (inclusive) to END (not inclusive)."
