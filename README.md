@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/lewang/flx.png)](http://travis-ci.org/lewang/flx)
+[![MELPA](https://melpa.org/packages/flx-badge.svg)](https://melpa.org/#/flx)
+[![MELPA Stable](https://stable.melpa.org/packages/flx-badge.svg)](https://stable.melpa.org/#/flx)
 
 ## Status
 
