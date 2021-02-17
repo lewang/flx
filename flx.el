@@ -34,7 +34,7 @@
 ;; Implementation notes
 ;; --------------------
 ;;
-;; Use defsubst instead of defun
+;; Use defsubst instead of defun.
 ;;
 ;; * Using bitmaps to check for matches worked out to be SLOWER than just
 ;;   scanning the string and using `flx-get-matches'.
@@ -46,19 +46,19 @@
 
 ;; Scott Frazer's blog entry http://scottfrazersblog.blogspot.com.au/2009/12/emacs-better-ido-flex-matching.html
 ;; provided a lot of inspiration.
-;; ido-hacks was helpful for ido optimization
+;; ido-hacks was helpful for ido optimization.
 
 ;;; Code:
 
 (require 'cl-lib)
 
 (defgroup flx nil
-  "Fuzzy matching with good sorting"
+  "Fuzzy matching with good sorting."
   :group 'convenience
   :prefix "flx-")
 
 (defcustom flx-word-separators '(?\  ?- ?_ ?: ?. ?/ ?\\)
-  "List of characters that act as word separators in flx"
+  "List of characters that act as word separators in flx."
   :type '(repeat character)
   :group 'flx)
 
@@ -220,9 +220,9 @@ See documentation for logic."
 
 
 (defsubst flx-bigger-sublist (sorted-list val)
-  "Return sublist bigger than VAL from sorted SORTED-LIST
+  "Return sublist bigger than VAL from sorted SORTED-LIST.
 
-  if VAL is nil, return entire list."
+If VAL is nil, return entire list."
   (if val
       (cl-loop for sub on sorted-list
             do (when (> (car sub) val)
@@ -337,7 +337,7 @@ For other parameters, see `flx-score'"
         match))))
 
 (defun flx-score (str query &optional cache)
-  "Return best score matching QUERY against STR"
+  "Return best score matching QUERY against STR."
   (unless (or (zerop (length query))
               (zerop (length str)))
     (let*
@@ -404,13 +404,13 @@ SCORE of nil means to clear the properties."
 (defvar flx-file-cache nil
   "Cached heatmap info about strings.")
 
-;;; reset value on every file load.
+;;; Reset value on every file load.
 (setq flx-file-cache (flx-make-filename-cache))
 
 (defvar flx-strings-cache nil
   "Cached heatmap info about filenames.")
 
-;;; reset value on every file load.
+;;; Reset value on every file load.
 (setq flx-strings-cache (flx-make-string-cache))
 
 
