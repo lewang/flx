@@ -66,7 +66,7 @@
   "Face used by flx for highlighting flx match characters."
   :group 'flx)
 
-;;; Do we need more word separators than ST?
+;; Do we need more word separators than ST?
 (defsubst flx-word-p (char)
   "Check if CHAR is a word character."
   (and char
@@ -404,13 +404,13 @@ SCORE of nil means to clear the properties."
 (defvar flx-file-cache nil
   "Cached heatmap info about strings.")
 
-;;; Reset value on every file load.
+;; Reset value on every file load.
 (setq flx-file-cache (flx-make-filename-cache))
 
 (defvar flx-strings-cache nil
   "Cached heatmap info about filenames.")
 
-;;; Reset value on every file load.
+;; Reset value on every file load.
 (setq flx-strings-cache (flx-make-string-cache))
 
 
