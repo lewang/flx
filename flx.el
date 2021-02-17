@@ -31,8 +31,18 @@
 
 ;;; Commentary:
 
-;; Implementation notes
-;; --------------------
+;; This package provides fuzzy completion matching with good sorting.
+
+;; The sorting algorithm is a balance between word beginnings
+;; (abbreviation) and contiguous matches (substring).
+
+;; The longer the substring match, the higher it scores.  This maps
+;; well to how we think about matching.
+
+;; In general, it's better form queries with only lowercase characters
+;; so the sorting algorithm can do something smart.
+
+;;; Implementation notes
 ;;
 ;; Use defsubst instead of defun.
 ;;
