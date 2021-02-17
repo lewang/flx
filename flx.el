@@ -36,11 +36,11 @@
 ;;
 ;; Use defsubst instead of defun.
 ;;
-;; * Using bitmaps to check for matches worked out to be SLOWER than just
-;;   scanning the string and using `flx-get-matches'.
+;; * Using bitmaps to check for matches worked out to be SLOWER than
+;;   just scanning the string and using `flx-get-matches'.
 ;;
-;; * Consing causes GC, which can often slowdown Emacs more than the benefits
-;;   of an optimization.
+;; * Consing causes GC, which can often slowdown Emacs more than the
+;;   benefits of an optimization.
 
 ;;; Acknowledgments
 
@@ -62,7 +62,8 @@
   :type '(repeat character)
   :group 'flx)
 
-(defface flx-highlight-face  '((t (:inherit font-lock-variable-name-face :bold t :underline t)))
+(defface flx-highlight-face
+  '((t (:inherit font-lock-variable-name-face :bold t :underline t)))
   "Face used by flx for highlighting flx match characters."
   :group 'flx)
 
@@ -146,7 +147,8 @@ See documentation for logic."
                       ;; gets penalized compared to "foo/ab".
                       (if (zerop group-word-count) nil last-char)))
                  (when (flx-boundary-p effective-last-char char)
-                   (setcdr (cdar groups-alist) (cons index (cl-cddar groups-alist))))
+                   (setcdr (cdar groups-alist)
+			   (cons index (cl-cddar groups-alist))))
                  (when (and (not (flx-word-p last-char))
                             (flx-word-p char))
                    (cl-incf group-word-count)))
@@ -389,10 +391,12 @@ SCORE of nil means to clear the properties."
       (dolist (char (cdr score))
         (when (and last-char
                    (not (= (1+ last-char) char)))
-          (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+          (put-text-property block-started  (1+ last-char)
+			     'face 'flx-highlight-face str)
           (setq block-started char))
         (setq last-char char))
-      (put-text-property block-started  (1+ last-char) 'face 'flx-highlight-face str)
+      (put-text-property block-started  (1+ last-char)
+			 'face 'flx-highlight-face str)
       (when add-score
         (setq str (format "%s [%s]" str (car score)))))
     (if (consp obj)
