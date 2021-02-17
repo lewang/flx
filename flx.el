@@ -100,8 +100,9 @@ This function is camel-case aware."
            (flx-word-p char))))
 
 (defsubst flx-inc-vec (vec &optional inc beg end)
-  "Increment each element of vectory by INC(default=1)
-from BEG (inclusive) to END (not inclusive)."
+  "Increment each element in VEC between BEG and END by INC.
+INC defaults to 1.  BEG defaults to 0 and is inclusive.
+END is not inclusive and defaults to the length of VEC."
   (or inc
       (setq inc 1))
   (or beg
