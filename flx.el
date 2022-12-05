@@ -362,7 +362,6 @@ For other parameters, see `flx-score'"
 
          ;; Raise recursion limit
          (max-lisp-eval-depth 5000)
-         (max-specpdl-size 10000)
 
          ;; Dynamic Programming table for memoizing flx-find-best-match
          (match-cache (make-hash-table :test 'eql :size 10))
