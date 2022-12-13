@@ -159,7 +159,7 @@ See documentation for logic."
                       (if (zerop group-word-count) nil last-char)))
                  (when (flx-boundary-p effective-last-char char)
                    (setcdr (cdar groups-alist)
-			   (cons index (cl-cddar groups-alist))))
+                           (cons index (cl-cddar groups-alist))))
                  (when (and (not (flx-word-p last-char))
                             (flx-word-p char))
                    (cl-incf group-word-count)))
@@ -362,7 +362,6 @@ For other parameters, see `flx-score'"
 
          ;; Raise recursion limit
          (max-lisp-eval-depth 5000)
-         (max-specpdl-size 10000)
 
          ;; Dynamic Programming table for memoizing flx-find-best-match
          (match-cache (make-hash-table :test 'eql :size 10))
@@ -403,11 +402,11 @@ SCORE of nil means to clear the properties."
         (when (and last-char
                    (not (= (1+ last-char) char)))
           (put-text-property block-started  (1+ last-char)
-			     'face 'flx-highlight-face str)
+                             'face 'flx-highlight-face str)
           (setq block-started char))
         (setq last-char char))
       (put-text-property block-started  (1+ last-char)
-			 'face 'flx-highlight-face str)
+                         'face 'flx-highlight-face str)
       (when add-score
         (setq str (format "%s [%s]" str (car score)))))
     (if (consp obj)
@@ -431,4 +430,7 @@ SCORE of nil means to clear the properties."
 
 (provide 'flx)
 
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; flx.el ends here
