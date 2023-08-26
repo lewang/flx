@@ -1,4 +1,4 @@
-;; Copyright © 2013-2022 Le Wang
+;; Copyright © 2013-2022 Le Wang -*- lexical-binding: t; -*-
 
 ;; This file is NOT part of GNU Emacs.
 
