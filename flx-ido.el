@@ -1,4 +1,4 @@
-;;; flx-ido.el --- flx integration for ido
+;;; flx-ido.el --- flx integration for ido  -*- lexical-binding: nil -*-
 
 ;; Copyright © 2013, 2015 Le Wang
 
