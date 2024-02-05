@@ -1,4 +1,4 @@
-;;; This is just a big list of files for experimenting
+;;; This is just a big list of files for experimenting -*- lexical-binding: t; -*-
 
 ;; Copyright © 2013-2022 Le Wang
 
