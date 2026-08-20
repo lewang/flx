@@ -8,7 +8,7 @@
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
 ;; Version: 0.6.2
 ;; URL: https://github.com/lewang/flx
-;; Package-Requires: ((flx "0.1") (cl-lib "0.3"))
+;; Package-Requires: ((emacs "24.1") (flx "0.1") (cl-lib "0.3"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -241,41 +241,44 @@ Our implementation always uses flex and doesn't care about substring matches."
   :group 'ido
   :global t)
 
-(defadvice ido-exit-minibuffer (around flx-ido-reset activate)
+(define-advice ido-exit-minibuffer (:before ())
   "Remove flx properties after."
-  (let* ((obj (car ido-matches))
-         (str (if (consp obj)
-                  (car obj)
-                obj)))
-    (when (and flx-ido-mode str)
-      (remove-text-properties 0 (length str)
-                              '(face flx-highlight-face) str))
-    (flx-ido-reset))
+  (when flx-ido-mode
+    (let* ((obj (car ido-matches))
+           (str (if (consp obj)
+                    (car obj)
+                  obj)))
+      (when str
+        (remove-text-properties 0 (length str)
+                                '(face flx-highlight-face) str))))
+  ;; FIXME Really do this even if flx-ido-mode is disabled?
+  (flx-ido-reset))
 
-  ad-do-it)
-
-(defadvice ido-read-internal (before flx-ido-reset activate)
+(define-advice ido-read-internal (:before (&rest _))
   "Clear flx narrowed hash beforehand."
   (when flx-ido-mode
     (flx-ido-reset)))
 
-(defadvice ido-restrict-to-matches (before flx-ido-reset activate)
+(define-advice ido-restrict-to-matches (:before (&optional _removep))
   "Clear flx narrowed hash."
   (when flx-ido-mode
     (flx-ido-reset)))
 
-(defadvice ido-set-matches-1 (around flx-ido-set-matches-1 activate compile)
+(define-advice ido-set-matches-1 (:around (fn items &optional do-full))
   "Choose between the regular ido-set-matches-1 and flx-ido-match"
   (if (not flx-ido-mode)
-      ad-do-it
-    (let* ((query ido-text)
-           (original-items (ad-get-arg 0)))
+      (funcall fn items do-full)
+    (let ((query ido-text)
+          (original-items items))
       (flx-ido-debug "query: %s" query)
       (flx-ido-debug "id-set-matches-1 sees %s items" (length original-items))
-      (setq ad-return-value (flx-ido-match query original-items)))
-    (flx-ido-debug "id-set-matches-1 returning %s items starting with %s " (length ad-return-value) (car ad-return-value))))
+      (let ((return (flx-ido-match query original-items)))
+        (flx-ido-debug "id-set-matches-1 returning %s items starting with %s "
+                       (length return)
+                       (car return))
+        return))))
 
-(defadvice ido-kill-buffer-at-head (before flx-ido-reset activate)
+(define-advice ido-kill-buffer-at-head (:before ())
   "Keep up with modification as required."
   (when flx-ido-mode
     ;; if not at EOB, query text is deleted.
