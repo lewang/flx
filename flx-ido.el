@@ -6,7 +6,7 @@
 ;; Maintainer: Le Wang
 ;; Description: flx integration for ido
 ;; Created: Sun Apr 21 20:38:36 2013 (+0800)
-;; Version: 0.6.2
+;; Version: 0.6.3
 ;; URL: https://github.com/lewang/flx
 ;; Package-Requires: ((emacs "24.1") (flx "0.1") (cl-lib "0.3"))
 
