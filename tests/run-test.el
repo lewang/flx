@@ -1,3 +1,5 @@
+;;; run-test.el --- Run flx tests  -*- lexical-binding: t; -*-
+
 ;; Copyright © 2013-2022 Le Wang
 
 ;; This file is NOT part of GNU Emacs.

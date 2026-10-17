@@ -1,6 +1,6 @@
-;;; flx-ido.el --- flx integration for ido -*- lexical-binding: t; -*-
+;;; flx-ido.el --- Flx integration for ido  -*- lexical-binding: t; -*-
 
-;; Copyright © 2013, 2015 Le Wang
+;; Copyright © 2013-2022 Le Wang
 
 ;; Author: Le Wang
 ;; Maintainer: Le Wang

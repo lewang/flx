@@ -1,6 +1,6 @@
-;;; flx-test.el --- flx ert unit tests
+;;; flx-test.el --- Flx ert unit tests  -*- lexical-binding: t; -*-
 
-;; Copyright © 2013 Le Wang
+;; Copyright © 2013-2022 Le Wang
 
 ;; Author: Le Wang
 ;; Maintainer: Le Wang
