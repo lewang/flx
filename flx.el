@@ -6,7 +6,7 @@
 ;; Maintainer: Le Wang
 ;; Description: fuzzy matching with good sorting
 ;; Created: Wed Apr 17 01:01:41 2013 (+0800)
-;; Version: 0.6.3
+;; Version: 0.6.4
 ;; Package-Requires: ((emacs "24.3"))
 ;; URL: https://github.com/lewang/flx
 
